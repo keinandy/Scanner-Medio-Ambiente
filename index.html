@@ -625,7 +625,7 @@
     </div>
 
     <script>
-        // IMPORTANTE: Cambiar esta URL por tu Google Apps Script Web App URL
+        // URL del Google Apps Script conectado a tu Google Sheet
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwvENq9VafApZYSosxk1_ACoIKlwy5_QDcY82Ek_Zv1REZO6OszjA0A6pYd44BqexDT/exec';
         
         let appData = {
@@ -645,14 +645,38 @@
 
         // Cargar datos desde Google Sheets
         async function loadDataFromSheets() {
+            console.log('🔄 Intentando cargar datos desde Google Sheets...');
+            console.log('📍 URL del Apps Script:', APPS_SCRIPT_URL);
+            
             try {
                 const response = await fetch(APPS_SCRIPT_URL);
+                console.log('✅ Respuesta recibida del servidor');
+                console.log('📊 Status:', response.status);
+                
                 const data = await response.json();
+                console.log('✅ Datos parseados correctamente');
+                console.log('📦 Datos recibidos:', data);
+                
+                if (data.status === 'error') {
+                    console.error('❌ Error en el Apps Script:', data.message);
+                    alert('Error al cargar el cuestionario: ' + data.message);
+                    return;
+                }
+                
                 appData = data;
-                console.log('Datos cargados:', appData);
+                console.log('✅ Datos cargados exitosamente:');
+                console.log('   📝 Preguntas:', appData.preguntas.length);
+                console.log('   🔧 Herramientas:', appData.herramientas.length);
+                console.log('   📂 Categorías:', appData.categorias.length);
             } catch (error) {
-                console.error('Error cargando datos:', error);
-                alert('Error al cargar el cuestionario. Por favor, recarga la página.');
+                console.error('❌ ERROR al cargar datos:', error);
+                console.error('📍 URL que falló:', APPS_SCRIPT_URL);
+                console.error('💡 Posibles causas:');
+                console.error('   1. El Apps Script no está desplegado como Web App');
+                console.error('   2. La URL del Apps Script es incorrecta');
+                console.error('   3. El Apps Script tiene errores');
+                console.error('   4. Problemas de CORS (poco probable)');
+                alert('Error al cargar el cuestionario. Revisa la consola (F12) para más detalles.');
             }
         }
 
