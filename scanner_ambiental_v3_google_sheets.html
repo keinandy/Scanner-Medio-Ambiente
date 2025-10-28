@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌱 Scanner Ambiental - Diagnóstico Empresarial</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <style>
+        :root {
+            --primary-green: #10B981;
+            --dark-green: #047857;
+            --light-green: #D1FAE5;
+            --accent-blue: #3B82F6;
+            --warning-orange: #F59E0B;
+            --error-red: #EF4444;
+            --dark-bg: #1F2937;
+            --darker-bg: #111827;
+            --text-light: #F9FAFB;
+            --text-gray: #9CA3AF;
+            --border-gray: #374151;
+            --card-bg: #374151;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--darker-bg) 0%, var(--dark-bg) 100%);
+            color: var(--text-light);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: rgba(31, 41, 55, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-gray);
+            padding: 1.5rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-green);
+        }
+        
+        .progress-info {
+            font-size: 0.875rem;
+            color: var(--text-gray);
+            display: none;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .screen {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .screen.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .welcome-screen {
+            text-align: center;
+            padding: 3rem 2rem;
+        }
+        
+        .welcome-title {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--primary-green), var(--accent-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .welcome-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-gray);
+            margin-bottom: 2rem;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .info-boxes {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem auto 3rem;
+            max-width: 900px;
+        }
+        
+        .info-box {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-gray);
+            text-align: left;
+        }
+        
+        .info-box-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--primary-green);
+        }
+        
+        .info-box-content {
+            color: var(--text-gray);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        
+        .empresa-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .empresa-card {
+            background: var(--card-bg);
+            border: 2px solid var(--border-gray);
+            border-radius: 12px;
+            padding: 2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .empresa-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--primary-green);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.2);
+        }
+        
+        .empresa-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .empresa-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .empresa-desc {
+            font-size: 0.875rem;
+            color: var(--text-gray);
+        }
+        
+        .question-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 3rem;
+            border: 1px solid var(--border-gray);
+        }
+        
+        .ruta-badge {
+            display: inline-block;
+            background: var(--primary-green);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .question-text {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            line-height: 1.5;
+        }
+        
+        .answer-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+        
+        .btn-answer {
+            flex: 1;
+            max-width: 200px;
+            padding: 1.5rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+            border: 2px solid var(--border-gray);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--darker-bg);
+            color: var(--text-light);
+        }
+        
+        .btn-answer:hover {
+            transform: scale(1.05);
+        }
+        
+        .btn-answer.si {
+            border-color: var(--primary-green);
+        }
+        
+        .btn-answer.si:hover {
+            background: var(--primary-green);
+        }
+        
+        .btn-answer.no {
+            border-color: var(--error-red);
+        }
+        
+        .btn-answer.no:hover {
+            background: var(--error-red);
+        }
+        
+        .results-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .results-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .nivel-badge {
+            display: inline-block;
+            font-size: 1.5rem;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            margin: 1rem 0;
+        }
+        
+        .nivel-excelente {
+            background: linear-gradient(135deg, #10B981, #047857);
+        }
+        
+        .nivel-bueno {
+            background: linear-gradient(135deg, #3B82F6, #1E40AF);
+        }
+        
+        .nivel-regular {
+            background: linear-gradient(135deg, #F59E0B, #D97706);
+        }
+        
+        .nivel-inicial {
+            background: linear-gradient(135deg, #EF4444, #B91C1C);
+        }
+        
+        .orientation-message {
+            background: var(--card-bg);
+            border-left: 4px solid var(--accent-blue);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem auto;
+            max-width: 800px;
+        }
+        
+        .orientation-message h3 {
+            color: var(--accent-blue);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .orientation-message p {
+            color: var(--text-gray);
+            line-height: 1.6;
+        }
+        
+        .gauge-container {
+            max-width: 400px;
+            margin: 2rem auto;
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 16px;
+            border: 1px solid var(--border-gray);
+        }
+        
+        .priority-section {
+            margin: 3rem 0;
+        }
+        
+        .priority-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .priority-title.urgente {
+            color: var(--error-red);
+        }
+        
+        .priority-title.mejorable {
+            color: var(--warning-orange);
+        }
+        
+        .priority-title.mantener {
+            color: var(--primary-green);
+        }
+        
+        .priority-cards {
+            display: grid;
+            gap: 1rem;
+        }
+        
+        .priority-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border-left: 4px solid;
+        }
+        
+        .priority-card.urgente {
+            border-left-color: var(--error-red);
+        }
+        
+        .priority-card.mejorable {
+            border-left-color: var(--warning-orange);
+        }
+        
+        .priority-card.mantener {
+            border-left-color: var(--primary-green);
+        }
+        
+        .priority-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .priority-card-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        .priority-card-percentage {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        
+        .priority-card-why {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            color: var(--text-gray);
+            font-style: italic;
+        }
+        
+        .progress-bar-simple {
+            width: 100%;
+            height: 8px;
+            background: var(--border-gray);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 0.75rem;
+        }
+        
+        .progress-fill-simple {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-green), var(--dark-green));
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+        }
+        
+        .btn-secondary {
+            background: var(--card-bg);
+            color: var(--text-light);
+            border: 1px solid var(--border-gray);
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary:hover {
+            border-color: var(--primary-green);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 3rem;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 3rem;
+        }
+        
+        .spinner {
+            border: 4px solid var(--border-gray);
+            border-top: 4px solid var(--primary-green);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-leaf"></i>
+                Scanner Medio Ambiente
+            </div>
+            <div class="progress-info" id="progressInfo">
+                Pregunta <span id="currentQ">0</span> de <span id="totalQ">0</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Welcome Screen -->
+        <div id="welcomeScreen" class="screen active">
+            <div class="welcome-screen">
+                <h1 class="welcome-title">🌱 Scanner de Medio Ambiente</h1>
+                <p class="welcome-subtitle">
+                    Identifica en cuál de las 5 áreas ambientales debes enfocarte primero.
+                    Recibe recomendaciones personalizadas y un plan de acción claro.
+                </p>
+                
+                <div class="info-boxes">
+                    <div class="info-box">
+                        <div class="info-box-title">
+                            <i class="fas fa-clipboard-check"></i>
+                            ¿Qué evaluaremos?
+                        </div>
+                        <div class="info-box-content">
+                            <ul>
+                                <li>Gestión de residuos</li>
+                                <li>Eficiencia hídrica</li>
+                                <li>Certificaciones ambientales</li>
+                                <li>Huella de carbono</li>
+                                <li>Eficiencia energética</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="info-box">
+                        <div class="info-box-title">
+                            <i class="fas fa-clock"></i>
+                            Tiempo y resultados
+                        </div>
+                        <div class="info-box-content">
+                            <strong>⏱️ Duración:</strong> 5 minutos<br>
+                            <strong>📊 Recibirás:</strong><br>
+                            • Tu nivel actual por área<br>
+                            • Priorización de acciones<br>
+                            • Reporte PDF descargable<br>
+                            • Herramientas recomendadas
+                        </div>
+                    </div>
+                    
+                    <div class="info-box">
+                        <div class="info-box-title">
+                            <i class="fas fa-route"></i>
+                            Plan de acción
+                        </div>
+                        <div class="info-box-content">
+                            Al finalizar sabrás:<br>
+                            • ¿Por dónde empezar?<br>
+                            • ¿Qué áreas priorizar?<br>
+                            • ¿Qué herramientas usar?<br>
+                            • ¿Cuáles áreas mantener?
+                        </div>
+                    </div>
+                </div>
+                
+                <h2 style="margin: 3rem 0 1.5rem; color: var(--text-gray);">Selecciona tu tipo de empresa</h2>
+                
+                <div class="empresa-grid">
+                    <div class="empresa-card" onclick="selectEmpresa('Constructora inmobiliaria')">
+                        <div class="empresa-icon">🏗️</div>
+                        <div class="empresa-name">Constructora Inmobiliaria</div>
+                        <div class="empresa-desc">Proyectos de construcción y desarrollo</div>
+                    </div>
+                    
+                    <div class="empresa-card" onclick="selectEmpresa('Consultoría')">
+                        <div class="empresa-icon">💼</div>
+                        <div class="empresa-name">Consultoría</div>
+                        <div class="empresa-desc">Servicios profesionales y asesoría</div>
+                    </div>
+                    
+                    <div class="empresa-card" onclick="selectEmpresa('Oficina arquitectura')">
+                        <div class="empresa-icon">📐</div>
+                        <div class="empresa-name">Oficina de Arquitectura</div>
+                        <div class="empresa-desc">Diseño arquitectónico y planificación</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Screen -->
+        <div id="loadingScreen" class="screen">
+            <div class="loading">
+                <div class="spinner"></div>
+                <h2>Cargando cuestionario...</h2>
+                <p style="color: var(--text-gray); margin-top: 1rem;">Preparando preguntas personalizadas</p>
+            </div>
+        </div>
+
+        <!-- Question Screen -->
+        <div id="questionScreen" class="screen">
+            <div class="question-container">
+                <div class="ruta-badge" id="rutaBadge"></div>
+                <div class="question-text" id="questionText"></div>
+                <div class="answer-buttons">
+                    <button class="btn-answer si" onclick="answerQuestion(true)">
+                        <i class="fas fa-check"></i> SÍ
+                    </button>
+                    <button class="btn-answer no" onclick="answerQuestion(false)">
+                        <i class="fas fa-times"></i> NO
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="resultsScreen" class="screen">
+            <div class="results-header">
+                <h1 class="results-title">📊 Tus Resultados en Medio Ambiente</h1>
+                <div id="nivelBadge" class="nivel-badge"></div>
+            </div>
+
+            <div class="orientation-message" id="orientationMessage"></div>
+
+            <div class="gauge-container">
+                <canvas id="gaugeChart"></canvas>
+            </div>
+
+            <div id="prioritySections"></div>
+
+            <div class="action-buttons">
+                <button class="btn-primary" onclick="downloadPDF()">
+                    <i class="fas fa-download"></i>
+                    Descargar Reporte PDF
+                </button>
+                <button class="btn-secondary" onclick="restartScanner()">
+                    <i class="fas fa-redo"></i>
+                    Nueva Evaluación
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // IMPORTANTE: Cambiar esta URL por tu Google Apps Script Web App URL
+        const APPS_SCRIPT_URL = 'TU_URL_DE_GOOGLE_APPS_SCRIPT_AQUI';
+        
+        let appData = {
+            preguntas: [],
+            herramientas: [],
+            categorias: []
+        };
+        
+        let currentState = {
+            empresaSeleccionada: null,
+            preguntaActual: 0,
+            respuestas: [],
+            resultados: null
+        };
+
+        let gaugeChart = null;
+
+        // Cargar datos desde Google Sheets
+        async function loadDataFromSheets() {
+            try {
+                const response = await fetch(APPS_SCRIPT_URL);
+                const data = await response.json();
+                appData = data;
+                console.log('Datos cargados:', appData);
+            } catch (error) {
+                console.error('Error cargando datos:', error);
+                alert('Error al cargar el cuestionario. Por favor, recarga la página.');
+            }
+        }
+
+        function selectEmpresa(tipo) {
+            currentState.empresaSeleccionada = tipo;
+            showScreen('loadingScreen');
+            
+            // Filtrar preguntas según tipo de empresa
+            const preguntasFiltradas = appData.preguntas.filter(p => {
+                const tipos = p.tipo_empresa.split(',').map(t => t.trim());
+                return tipos.includes(tipo);
+            });
+            
+            currentState.preguntasFiltradas = preguntasFiltradas;
+            
+            setTimeout(() => {
+                showScreen('questionScreen');
+                document.getElementById('progressInfo').style.display = 'block';
+                showQuestion();
+            }, 1000);
+        }
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function showQuestion() {
+            const pregunta = currentState.preguntasFiltradas[currentState.preguntaActual];
+            
+            document.getElementById('rutaBadge').textContent = pregunta.categoria;
+            document.getElementById('questionText').textContent = pregunta.pregunta;
+            
+            document.getElementById('currentQ').textContent = currentState.preguntaActual + 1;
+            document.getElementById('totalQ').textContent = currentState.preguntasFiltradas.length;
+        }
+
+        function answerQuestion(respuesta) {
+            const pregunta = currentState.preguntasFiltradas[currentState.preguntaActual];
+            
+            currentState.respuestas.push({
+                id: pregunta.id,
+                pregunta: pregunta.pregunta,
+                categoria: pregunta.categoria,
+                contexto_categoria: pregunta.contexto_categoria,
+                recomendacion: pregunta.recomendacion_si_no,
+                respuesta: respuesta,
+                peso: pregunta.peso_puntos
+            });
+            
+            currentState.preguntaActual++;
+            
+            if (currentState.preguntaActual >= currentState.preguntasFiltradas.length) {
+                calculateResults();
+                return;
+            }
+            
+            showQuestion();
+        }
+
+        function calculateResults() {
+            const categorias = {};
+            let totalPuntos = 0;
+            let puntosObtenidos = 0;
+            
+            // Agrupar por categoría
+            currentState.respuestas.forEach(r => {
+                if (!categorias[r.categoria]) {
+                    categorias[r.categoria] = {
+                        nombre: r.categoria,
+                        contexto: r.contexto_categoria,
+                        total: 0,
+                        obtenidos: 0,
+                        preguntas: []
+                    };
+                }
+                
+                categorias[r.categoria].total += r.peso;
+                totalPuntos += r.peso;
+                
+                if (r.respuesta) {
+                    categorias[r.categoria].obtenidos += r.peso;
+                    puntosObtenidos += r.peso;
+                }
+                
+                categorias[r.categoria].preguntas.push(r);
+            });
+            
+            // Calcular porcentajes
+            const resultadosPorRuta = Object.values(categorias).map(cat => ({
+                nombre: cat.nombre,
+                contexto: cat.contexto,
+                total: cat.total,
+                obtenidos: cat.obtenidos,
+                porcentaje: Math.round((cat.obtenidos / cat.total) * 100),
+                preguntas: cat.preguntas
+            }));
+            
+            const porcentajeGeneral = Math.round((puntosObtenidos / totalPuntos) * 100);
+            
+            // Determinar nivel
+            let nivel, nivelClase, nivelDescripcion;
+            if (porcentajeGeneral >= 80) {
+                nivel = "🌳 EXCELENTE - Liderazgo ambiental";
+                nivelClase = "nivel-excelente";
+                nivelDescripcion = "Tu empresa muestra un alto nivel de madurez ambiental. Estás entre las empresas líderes del sector.";
+            } else if (porcentajeGeneral >= 60) {
+                nivel = "🌿 BUENO - En desarrollo sostenible";
+                nivelClase = "nivel-bueno";
+                nivelDescripcion = "Tu empresa tiene bases sólidas. Con mejoras enfocadas, puedes alcanzar el nivel de excelencia.";
+            } else if (porcentajeGeneral >= 40) {
+                nivel = "🌾 REGULAR - Oportunidades de mejora";
+                nivelClase = "nivel-regular";
+                nivelDescripcion = "Tu empresa ha dado los primeros pasos, pero hay áreas importantes por desarrollar para cumplir estándares actuales.";
+            } else {
+                nivel = "🌱 INICIAL - Punto de partida";
+                nivelClase = "nivel-inicial";
+                nivelDescripcion = "Estás comenzando tu camino hacia la sostenibilidad. Las herramientas sugeridas te ayudarán a construir bases sólidas.";
+            }
+            
+            // Clasificar por prioridad
+            const urgentes = resultadosPorRuta.filter(r => r.porcentaje < 40);
+            const mejorables = resultadosPorRuta.filter(r => r.porcentaje >= 40 && r.porcentaje < 70);
+            const mantener = resultadosPorRuta.filter(r => r.porcentaje >= 70);
+            
+            currentState.resultados = {
+                porcentajeGeneral,
+                nivel,
+                nivelClase,
+                nivelDescripcion,
+                totalPuntos,
+                puntosObtenidos,
+                resultadosPorRuta,
+                urgentes,
+                mejorables,
+                mantener
+            };
+            
+            // Enviar a Google Sheets
+            saveToSheets();
+            
+            showResults();
+        }
+
+        async function saveToSheets() {
+            try {
+                const dataToSave = {
+                    timestamp: new Date().toISOString(),
+                    tipo_empresa: currentState.empresaSeleccionada,
+                    porcentaje_general: currentState.resultados.porcentajeGeneral,
+                    nivel: currentState.resultados.nivel,
+                    respuestas: currentState.respuestas
+                };
+                
+                await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(dataToSave)
+                });
+            } catch (error) {
+                console.error('Error guardando en Sheets:', error);
+            }
+        }
+
+        function showResults() {
+            showScreen('resultsScreen');
+            document.getElementById('progressInfo').style.display = 'none';
+
+            const results = currentState.resultados;
+
+            document.getElementById('nivelBadge').textContent = results.nivel;
+            document.getElementById('nivelBadge').className = `nivel-badge ${results.nivelClase}`;
+
+            let prioridadTexto = "";
+            if (results.urgentes.length > 0) {
+                prioridadTexto = `Te recomendamos comenzar por <strong>${results.urgentes[0].nombre}</strong>` + 
+                    (results.urgentes.length > 1 ? ` y <strong>${results.urgentes[1].nombre}</strong>` : "") + 
+                    `, donde tienes mayor oportunidad de mejora.`;
+            } else if (results.mejorables.length > 0) {
+                prioridadTexto = `Enfócate en mejorar <strong>${results.mejorables[0].nombre}</strong> para alcanzar el siguiente nivel.`;
+            } else {
+                prioridadTexto = `¡Excelente trabajo! Mantén tus estándares actuales y sigue innovando.`;
+            }
+
+            document.getElementById('orientationMessage').innerHTML = `
+                <h3><i class="fas fa-compass"></i> Tu plan recomendado</h3>
+                <p>${results.nivelDescripcion}</p>
+                <p style="margin-top: 0.75rem;">${prioridadTexto}</p>
+            `;
+
+            createGaugeChart(results.porcentajeGeneral);
+
+            const prioritySections = document.getElementById('prioritySections');
+            prioritySections.innerHTML = '';
+
+            if (results.urgentes.length > 0) {
+                prioritySections.appendChild(createPrioritySection('urgente', 'ÁREAS PRIORITARIAS - Empieza aquí', results.urgentes));
+            }
+
+            if (results.mejorables.length > 0) {
+                prioritySections.appendChild(createPrioritySection('mejorable', 'OPORTUNIDADES DE MEJORA', results.mejorables));
+            }
+
+            if (results.mantener.length > 0) {
+                prioritySections.appendChild(createPrioritySection('mantener', 'ÁREAS FUERTES - Mantén el nivel', results.mantener));
+            }
+        }
+
+        function createPrioritySection(type, title, rutas) {
+            const section = document.createElement('div');
+            section.className = 'priority-section';
+
+            const iconMap = {
+                'urgente': '🔴',
+                'mejorable': '🟡',
+                'mantener': '🟢'
+            };
+
+            section.innerHTML = `
+                <h2 class="priority-title ${type}">
+                    ${iconMap[type]} ${title}
+                </h2>
+                <div class="priority-cards"></div>
+            `;
+
+            const cardsContainer = section.querySelector('.priority-cards');
+
+            rutas.forEach(ruta => {
+                const card = document.createElement('div');
+                card.className = `priority-card ${type}`;
+
+                let color = '#EF4444';
+                if (ruta.porcentaje >= 70) color = '#10B981';
+                else if (ruta.porcentaje >= 40) color = '#F59E0B';
+
+                // Contar herramientas disponibles
+                const herramientasCount = getHerramientasForCategoria(ruta.preguntas);
+
+                card.innerHTML = `
+                    <div class="priority-card-header">
+                        <div class="priority-card-name">${ruta.nombre}</div>
+                        <div class="priority-card-percentage" style="color: ${color}">${ruta.porcentaje}%</div>
+                    </div>
+                    <div class="priority-card-why">
+                        💡 ${ruta.contexto}
+                    </div>
+                    <div style="color: var(--text-gray); font-size: 0.9rem; margin-bottom: 0.5rem;">
+                        ${ruta.obtenidos} de ${ruta.total} puntos obtenidos
+                    </div>
+                    <div class="progress-bar-simple">
+                        <div class="progress-fill-simple" style="width: ${ruta.porcentaje}%; background: ${color}"></div>
+                    </div>
+                    ${herramientasCount > 0 ? `
+                        <div style="margin-top: 1rem; color: var(--primary-green); font-size: 0.9rem;">
+                            🔧 ${herramientasCount} herramientas recomendadas
+                        </div>
+                    ` : ''}
+                `;
+
+                cardsContainer.appendChild(card);
+            });
+
+            return section;
+        }
+
+        function getHerramientasForCategoria(preguntas) {
+            let count = 0;
+            preguntas.forEach(p => {
+                if (!p.respuesta) {
+                    const herr = appData.herramientas.filter(h => 
+                        h.id_preguntas_vinculadas.includes(p.id)
+                    );
+                    count += herr.length;
+                }
+            });
+            return count;
+        }
+
+        function createGaugeChart(percentage) {
+            const canvas = document.getElementById('gaugeChart');
+            const ctx = canvas.getContext('2d');
+
+            if (gaugeChart) {
+                gaugeChart.destroy();
+            }
+
+            let color;
+            if (percentage >= 80) color = '#10B981';
+            else if (percentage >= 60) color = '#3B82F6';
+            else if (percentage >= 40) color = '#F59E0B';
+            else color = '#EF4444';
+
+            gaugeChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [percentage, 100 - percentage],
+                        backgroundColor: [color, '#374151'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    cutout: '75%',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: false }
+                    }
+                },
+                plugins: [{
+                    id: 'centerText',
+                    afterDraw: (chart) => {
+                        const ctx = chart.ctx;
+                        const centerX = chart.width / 2;
+                        const centerY = chart.height / 2;
+                        
+                        ctx.save();
+                        ctx.font = 'bold 48px Inter';
+                        ctx.fillStyle = color;
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(`${percentage}%`, centerX, centerY);
+                        ctx.restore();
+                    }
+                }]
+            });
+        }
+
+        async function downloadPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'mm', 'a4');
+            const results = currentState.resultados;
+            
+            const verde = [16, 185, 129];
+            const darkGray = [55, 65, 81];
+            
+            let y = 20;
+            
+            // Header
+            doc.setFillColor(...verde);
+            doc.rect(0, 0, 210, 35, 'F');
+            
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(22);
+            doc.setFont('helvetica', 'bold');
+            doc.text('REPORTE DE EVALUACION AMBIENTAL', 105, 15, { align: 'center' });
+            
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'normal');
+            doc.text('Scanner Ambiental - Plan de Accion Personalizado', 105, 25, { align: 'center' });
+            
+            y = 45;
+            doc.setTextColor(...darkGray);
+            doc.setFontSize(11);
+            doc.text(`Empresa: ${currentState.empresaSeleccionada}`, 20, y);
+            doc.text(`Fecha: ${new Date().toLocaleDateString('es-CL')}`, 20, y + 6);
+            
+            // Resumen
+            y += 20;
+            doc.setFillColor(240, 240, 240);
+            doc.rect(15, y - 5, 180, 50, 'F');
+            
+            doc.setFontSize(16);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(...verde);
+            doc.text('RESUMEN EJECUTIVO', 20, y + 5);
+            
+            let nivelTexto = results.nivel.replace(/[^\w\s-]/gi, '').trim();
+            
+            doc.setFontSize(13);
+            doc.setTextColor(...darkGray);
+            doc.setFont('helvetica', 'bold');
+            doc.text(`Nivel: ${nivelTexto}`, 20, y + 18);
+            
+            doc.setFontSize(11);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Puntuacion General: ${results.porcentajeGeneral}%`, 20, y + 30);
+            
+            // Tu Plan Recomendado
+            y += 60;
+            doc.setFontSize(14);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(...verde);
+            doc.text('TU PLAN RECOMENDADO', 20, y);
+            
+            y += 10;
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(...darkGray);
+            const descripcionLines = doc.splitTextToSize(results.nivelDescripcion, 170);
+            doc.text(descripcionLines, 20, y);
+            y += descripcionLines.length * 4 + 8;
+            
+            // HERRAMIENTAS DETALLADAS (LO NUEVO)
+            doc.addPage();
+            y = 25;
+            
+            doc.setFontSize(16);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(...verde);
+            doc.text('HERRAMIENTAS RECOMENDADAS', 20, y);
+            
+            y += 12;
+            
+            // Obtener preguntas con respuesta NO
+            const preguntasNO = currentState.respuestas.filter(r => !r.respuesta);
+            
+            preguntasNO.forEach((pregunta, idx) => {
+                if (y > 265) {
+                    doc.addPage();
+                    y = 25;
+                }
+                
+                // Obtener herramientas vinculadas
+                const herramientasVinculadas = appData.herramientas.filter(h => 
+                    h.id_preguntas_vinculadas.split(',').map(id => id.trim()).includes(pregunta.id)
+                );
+                
+                if (herramientasVinculadas.length > 0) {
+                    // Categoría
+                    doc.setFontSize(11);
+                    doc.setTextColor(...verde);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(pregunta.categoria, 20, y);
+                    y += 6;
+                    
+                    // Pregunta
+                    doc.setFontSize(9);
+                    doc.setTextColor(...darkGray);
+                    doc.setFont('helvetica', 'normal');
+                    const preguntaLines = doc.splitTextToSize(pregunta.pregunta, 170);
+                    doc.text(preguntaLines, 20, y);
+                    y += preguntaLines.length * 3.5 + 3;
+                    
+                    // Recomendación
+                    if (pregunta.recomendacion) {
+                        doc.setFont('helvetica', 'italic');
+                        doc.setTextColor(100, 100, 100);
+                        const recomendacionLines = doc.splitTextToSize(`💡 ${pregunta.recomendacion}`, 165);
+                        doc.text(recomendacionLines, 22, y);
+                        y += recomendacionLines.length * 3.5 + 5;
+                    }
+                    
+                    // Herramientas
+                    herramientasVinculadas.forEach(herr => {
+                        if (y > 260) {
+                            doc.addPage();
+                            y = 25;
+                        }
+                        
+                        doc.setFontSize(10);
+                        doc.setTextColor(...verde);
+                        doc.setFont('helvetica', 'bold');
+                        doc.text(`${herr.nombre}`, 25, y);
+                        y += 5;
+                        
+                        // Descripción de uso
+                        doc.setFontSize(9);
+                        doc.setTextColor(...darkGray);
+                        doc.setFont('helvetica', 'normal');
+                        const descripcionLines = doc.splitTextToSize(herr.descripcion_uso, 160);
+                        doc.text(descripcionLines, 25, y);
+                        y += descripcionLines.length * 3.5 + 2;
+                        
+                        // Detalles
+                        doc.setFontSize(8);
+                        doc.setTextColor(100, 100, 100);
+                        doc.text(`Tipo: ${herr.tipo} | Duracion: ${herr.duracion} | Costo: ${herr.costo} | Nivel: ${herr.nivel}`, 25, y);
+                        y += 4;
+                        
+                        // Link (si existe y no es ejemplo.com)
+                        if (herr.url && !herr.url.includes('ejemplo.com')) {
+                            doc.setTextColor(16, 185, 129);
+                            doc.textWithLink('Ver recurso', 25, y, { url: herr.url });
+                            y += 5;
+                        }
+                        
+                        y += 3;
+                    });
+                    
+                    y += 5;
+                }
+            });
+            
+            // Footer en todas las páginas
+            const pageCount = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                doc.setFontSize(8);
+                doc.setTextColor(156, 163, 175);
+                doc.text(`Scanner Ambiental - Pagina ${i} de ${pageCount}`, 20, 285);
+                doc.text(`Generado: ${new Date().toLocaleString('es-CL')}`, 140, 285);
+            }
+            
+            const filename = `Reporte_Ambiental_${currentState.empresaSeleccionada.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+            doc.save(filename);
+        }
+
+        function restartScanner() {
+            if (gaugeChart) {
+                gaugeChart.destroy();
+                gaugeChart = null;
+            }
+            
+            currentState = {
+                empresaSeleccionada: null,
+                preguntaActual: 0,
+                respuestas: [],
+                resultados: null
+            };
+            
+            showScreen('welcomeScreen');
+            document.getElementById('progressInfo').style.display = 'none';
+        }
+
+        // Cargar datos al iniciar
+        window.addEventListener('DOMContentLoaded', () => {
+            loadDataFromSheets();
+        });
+    </script>
+</body>
+</html>
