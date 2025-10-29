@@ -658,6 +658,7 @@
             empresaSeleccionada: null,
             preguntaActual: 0,
             respuestas: [],
+            preguntasSaltadas: new Set(), // Set para evitar duplicados
             resultados: null
         };
 
@@ -771,7 +772,19 @@
                 return tipos.includes(currentState.empresaSeleccionada) || tipos.includes('Todas');
             });
             
+            // Ordenar por categoría y orden
+            preguntasFiltradas.sort((a, b) => {
+                if (a.categoria !== b.categoria) {
+                    return a.categoria.localeCompare(b.categoria);
+                }
+                return a.orden - b.orden;
+            });
+            
             currentState.preguntasFiltradas = preguntasFiltradas;
+            currentState.preguntaActual = 0;
+            currentState.preguntasSaltadas = new Set();
+            
+            console.log(`📋 Total de preguntas filtradas: ${preguntasFiltradas.length}`);
             
             setTimeout(() => {
                 showScreen('questionScreen');
@@ -786,18 +799,39 @@
         }
 
         function showQuestion() {
-            const pregunta = currentState.preguntasFiltradas[currentState.preguntaActual];
+            // Buscar la siguiente pregunta no saltada
+            while (currentState.preguntaActual < currentState.preguntasFiltradas.length) {
+                const pregunta = currentState.preguntasFiltradas[currentState.preguntaActual];
+                
+                // Verificar si esta pregunta ya fue saltada
+                if (currentState.preguntasSaltadas.has(pregunta.id)) {
+                    console.log(`⏩ Saltando pregunta ${pregunta.id} (ya procesada como dependiente)`);
+                    currentState.preguntaActual++;
+                    continue;
+                }
+                
+                // Mostrar la pregunta
+                document.getElementById('rutaBadge').textContent = pregunta.categoria;
+                document.getElementById('questionText').textContent = pregunta.pregunta;
+                
+                // Actualizar contador (descontando las saltadas)
+                const preguntasRestantes = currentState.preguntasFiltradas.length - currentState.preguntasSaltadas.size;
+                const preguntaNumero = currentState.preguntaActual + 1 - currentState.preguntasSaltadas.size;
+                
+                document.getElementById('currentQ').textContent = preguntaNumero;
+                document.getElementById('totalQ').textContent = preguntasRestantes;
+                
+                return; // Salir cuando encontramos una pregunta válida
+            }
             
-            document.getElementById('rutaBadge').textContent = pregunta.categoria;
-            document.getElementById('questionText').textContent = pregunta.pregunta;
-            
-            document.getElementById('currentQ').textContent = currentState.preguntaActual + 1;
-            document.getElementById('totalQ').textContent = currentState.preguntasFiltradas.length;
+            // Si llegamos aquí, no hay más preguntas
+            calculateResults();
         }
 
         function answerQuestion(respuesta) {
             const pregunta = currentState.preguntasFiltradas[currentState.preguntaActual];
             
+            // Guardar respuesta actual
             currentState.respuestas.push({
                 id: pregunta.id,
                 pregunta: pregunta.pregunta,
@@ -808,52 +842,90 @@
                 peso: pregunta.peso_puntos
             });
             
-            // 🔥 LÓGICA DE PREGUNTA MADRE MEJORADA
-            // Si es pregunta -001 y responde NO, saltar todas las hijas
-            if (pregunta.id && pregunta.id.endsWith('-001') && !respuesta) {
-                console.log(`⏭️ Pregunta madre ${pregunta.id} respondida NO - saltando preguntas dependientes`);
+            console.log(`📝 Respuesta guardada: ${pregunta.id} = ${respuesta ? 'SÍ' : 'NO'}`);
+            
+            // LÓGICA MEJORADA DE PREGUNTA MADRE
+            if (!respuesta) { // Si responde NO
+                // Buscar preguntas que dependen de esta pregunta madre
+                const preguntasDependientes = currentState.preguntasFiltradas.filter(p => 
+                    p.pregunta_madre && 
+                    p.pregunta_madre.trim() === pregunta.id && 
+                    !currentState.preguntasSaltadas.has(p.id)
+                );
                 
-                // Saltar todas las preguntas que tengan esta como pregunta_madre
-                let preguntasSaltadas = 0;
-                for (let i = currentState.preguntaActual + 1; i < currentState.preguntasFiltradas.length; i++) {
-                    const siguiente = currentState.preguntasFiltradas[i];
+                if (preguntasDependientes.length > 0) {
+                    console.log(`🔗 Pregunta madre ${pregunta.id} respondida NO`);
+                    console.log(`   Saltando ${preguntasDependientes.length} preguntas dependientes:`);
                     
-                    // Verificar si depende de esta pregunta madre
-                    if (siguiente.pregunta_madre === pregunta.id) {
-                        // Auto-responder NO a las preguntas dependientes
+                    preguntasDependientes.forEach(dep => {
+                        // Marcar como saltada
+                        currentState.preguntasSaltadas.add(dep.id);
+                        
+                        // Auto-responder NO
                         currentState.respuestas.push({
-                            id: siguiente.id,
-                            pregunta: siguiente.pregunta,
-                            categoria: siguiente.categoria,
-                            contexto_categoria: siguiente.contexto_categoria,
-                            recomendacion: siguiente.recomendacion_si_no,
+                            id: dep.id,
+                            pregunta: dep.pregunta,
+                            categoria: dep.categoria,
+                            contexto_categoria: dep.contexto_categoria,
+                            recomendacion: dep.recomendacion_si_no,
                             respuesta: false,
-                            peso: siguiente.peso_puntos,
+                            peso: dep.peso_puntos,
                             auto_skipped: true
                         });
-                        preguntasSaltadas++;
-                    }
-                    // Si la siguiente pregunta es de otra categoría, terminar
-                    else if (siguiente.categoria !== pregunta.categoria) {
-                        break;
-                    }
+                        
+                        console.log(`   → ${dep.id}: auto-respondida NO`);
+                    });
                 }
                 
-                console.log(`   ⏩ ${preguntasSaltadas} preguntas dependientes saltadas automáticamente`);
-                currentState.preguntaActual += preguntasSaltadas + 1;
-            } else {
-                currentState.preguntaActual++;
+                // También verificar patrón -001 (por compatibilidad legacy)
+                if (pregunta.id.endsWith('-001')) {
+                    const baseId = pregunta.id.substring(0, pregunta.id.length - 4);
+                    const preguntasHijas = currentState.preguntasFiltradas.filter(p => 
+                        p.id.startsWith(baseId) && 
+                        p.id !== pregunta.id && 
+                        !currentState.preguntasSaltadas.has(p.id)
+                    );
+                    
+                    if (preguntasHijas.length > 0) {
+                        console.log(`📦 Patrón -001 detectado, saltando ${preguntasHijas.length} preguntas del grupo`);
+                        
+                        preguntasHijas.forEach(hija => {
+                            if (!currentState.preguntasSaltadas.has(hija.id)) {
+                                currentState.preguntasSaltadas.add(hija.id);
+                                
+                                // Solo agregar respuesta si no existe ya
+                                if (!currentState.respuestas.find(r => r.id === hija.id)) {
+                                    currentState.respuestas.push({
+                                        id: hija.id,
+                                        pregunta: hija.pregunta,
+                                        categoria: hija.categoria,
+                                        contexto_categoria: hija.contexto_categoria,
+                                        recomendacion: hija.recomendacion_si_no,
+                                        respuesta: false,
+                                        peso: hija.peso_puntos,
+                                        auto_skipped: true
+                                    });
+                                    console.log(`   → ${hija.id}: auto-respondida NO (patrón -001)`);
+                                }
+                            }
+                        });
+                    }
+                }
             }
+            
+            // Avanzar a la siguiente pregunta
+            currentState.preguntaActual++;
             
             if (currentState.preguntaActual >= currentState.preguntasFiltradas.length) {
                 calculateResults();
-                return;
+            } else {
+                showQuestion();
             }
-            
-            showQuestion();
         }
 
         function calculateResults() {
+            console.log('📊 Calculando resultados finales...');
+            
             const categorias = {};
             let totalPuntos = 0;
             let puntosObtenidos = 0;
@@ -931,6 +1003,13 @@
                 mantener
             };
             
+            console.log('✅ Resultados calculados:', {
+                porcentajeGeneral: porcentajeGeneral + '%',
+                nivel: nivel,
+                respuestasTotal: currentState.respuestas.length,
+                autoSaltadas: currentState.respuestas.filter(r => r.auto_skipped).length
+            });
+            
             // Enviar a Google Sheets
             saveToSheets();
             
@@ -949,7 +1028,7 @@
                     respuestas: currentState.respuestas
                 };
                 
-                console.log('💾 Guardando respuestas en Google Sheets...', dataToSave);
+                console.log('💾 Guardando respuestas en Google Sheets...');
                 
                 await fetch(APPS_SCRIPT_URL, {
                     method: 'POST',
@@ -1196,7 +1275,7 @@
             doc.text(descripcionLines, 20, y);
             y += descripcionLines.length * 4 + 8;
             
-            // HERRAMIENTAS DETALLADAS (LO NUEVO)
+            // HERRAMIENTAS DETALLADAS
             doc.addPage();
             y = 25;
             
@@ -1207,8 +1286,8 @@
             
             y += 12;
             
-            // Obtener preguntas con respuesta NO
-            const preguntasNO = currentState.respuestas.filter(r => !r.respuesta);
+            // Obtener solo preguntas con respuesta NO que no fueron auto-saltadas
+            const preguntasNO = currentState.respuestas.filter(r => !r.respuesta && !r.auto_skipped);
             
             preguntasNO.forEach((pregunta, idx) => {
                 if (y > 265) {
@@ -1241,7 +1320,7 @@
                     if (pregunta.recomendacion) {
                         doc.setFont('helvetica', 'italic');
                         doc.setTextColor(100, 100, 100);
-                        const recomendacionLines = doc.splitTextToSize(`💡 ${pregunta.recomendacion}`, 165);
+                        const recomendacionLines = doc.splitTextToSize(`Recomendacion: ${pregunta.recomendacion}`, 165);
                         doc.text(recomendacionLines, 22, y);
                         y += recomendacionLines.length * 3.5 + 5;
                     }
@@ -1311,11 +1390,19 @@
                 empresaSeleccionada: null,
                 preguntaActual: 0,
                 respuestas: [],
+                preguntasSaltadas: new Set(),
                 resultados: null
             };
             
             showScreen('welcomeScreen');
             document.getElementById('progressInfo').style.display = 'none';
+            
+            // Resetear formulario
+            document.getElementById('userName').value = '';
+            document.getElementById('userEmail').value = '';
+            document.getElementById('userDataForm').style.display = 'none';
+            document.getElementById('empresaGrid').style.display = 'grid';
+            document.querySelector('h2').style.display = 'block';
         }
 
         // Cargar datos al iniciar
