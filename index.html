@@ -177,6 +177,11 @@
         .empresa-icon {
             font-size: 3rem;
             margin-bottom: 1rem;
+            color: var(--primary-green);
+        }
+        
+        .empresa-icon i {
+            font-size: 3rem;
         }
         
         .empresa-name {
@@ -549,23 +554,37 @@
                 
                 <h2 style="margin: 3rem 0 1.5rem; color: var(--text-gray);">Selecciona tu tipo de empresa</h2>
                 
-                <div class="empresa-grid">
-                    <div class="empresa-card" onclick="selectEmpresa('Constructora inmobiliaria')">
-                        <div class="empresa-icon">🏗️</div>
-                        <div class="empresa-name">Constructora Inmobiliaria</div>
-                        <div class="empresa-desc">Proyectos de construcción y desarrollo</div>
-                    </div>
-                    
-                    <div class="empresa-card" onclick="selectEmpresa('Consultoría')">
-                        <div class="empresa-icon">💼</div>
-                        <div class="empresa-name">Consultoría</div>
-                        <div class="empresa-desc">Servicios profesionales y asesoría</div>
-                    </div>
-                    
-                    <div class="empresa-card" onclick="selectEmpresa('Oficina arquitectura')">
-                        <div class="empresa-icon">📐</div>
-                        <div class="empresa-name">Oficina de Arquitectura</div>
-                        <div class="empresa-desc">Diseño arquitectónico y planificación</div>
+                <div class="empresa-grid" id="empresaGrid">
+                    <!-- Las empresas se cargarán dinámicamente desde Google Sheets -->
+                </div>
+                
+                <!-- Formulario de datos (oculto inicialmente) -->
+                <div id="userDataForm" style="display: none; max-width: 500px; margin: 2rem auto;">
+                    <div style="background: var(--card-bg); border-radius: 12px; padding: 2rem; border: 1px solid var(--border-gray);">
+                        <h3 style="margin-bottom: 1.5rem; text-align: center;">Antes de empezar...</h3>
+                        
+                        <div style="margin-bottom: 1rem;">
+                            <label style="display: block; margin-bottom: 0.5rem; color: var(--text-gray);">Nombre (opcional)</label>
+                            <input type="text" id="userName" placeholder="Ej: Juan Pérez" 
+                                   style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-gray); 
+                                          background: var(--darker-bg); color: var(--text-light); font-size: 1rem;">
+                        </div>
+                        
+                        <div style="margin-bottom: 1.5rem;">
+                            <label style="display: block; margin-bottom: 0.5rem; color: var(--text-gray);">Email (opcional)</label>
+                            <input type="email" id="userEmail" placeholder="Ej: juan@empresa.cl"
+                                   style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-gray); 
+                                          background: var(--darker-bg); color: var(--text-light); font-size: 1rem;">
+                        </div>
+                        
+                        <button class="btn-primary" onclick="startSurvey()" style="width: 100%; justify-content: center;">
+                            <i class="fas fa-play"></i>
+                            Comenzar Evaluación
+                        </button>
+                        
+                        <p style="text-align: center; margin-top: 1rem; font-size: 0.875rem; color: var(--text-gray);">
+                            <i class="fas fa-lock"></i> Tus datos son privados y no serán compartidos
+                        </p>
                     </div>
                 </div>
             </div>
@@ -631,7 +650,8 @@
         let appData = {
             preguntas: [],
             herramientas: [],
-            categorias: []
+            categorias: [],
+            empresas: []
         };
         
         let currentState = {
@@ -668,6 +688,11 @@
                 console.log('   📝 Preguntas:', appData.preguntas.length);
                 console.log('   🔧 Herramientas:', appData.herramientas.length);
                 console.log('   📂 Categorías:', appData.categorias.length);
+                console.log('   🏢 Empresas:', appData.empresas.length);
+                
+                // Renderizar empresas dinámicamente
+                renderEmpresas();
+                
             } catch (error) {
                 console.error('❌ ERROR al cargar datos:', error);
                 console.error('📍 URL que falló:', APPS_SCRIPT_URL);
@@ -679,15 +704,71 @@
                 alert('Error al cargar el cuestionario. Revisa la consola (F12) para más detalles.');
             }
         }
+        
+        // Renderizar empresas dinámicamente
+        function renderEmpresas() {
+            const empresaGrid = document.getElementById('empresaGrid');
+            empresaGrid.innerHTML = ''; // Limpiar
+            
+            if (!appData.empresas || appData.empresas.length === 0) {
+                empresaGrid.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 2rem;">
+                        <p style="color: var(--warning-orange); font-size: 1.1rem;">
+                            ⚠️ No se encontraron tipos de empresa en el Google Sheet.
+                        </p>
+                        <p style="color: var(--text-gray); margin-top: 0.5rem;">
+                            Verifica que exista la hoja "Empresas" con datos activos.
+                        </p>
+                    </div>
+                `;
+                return;
+            }
+            
+            appData.empresas.forEach(empresa => {
+                const card = document.createElement('div');
+                card.className = 'empresa-card';
+                card.onclick = () => selectEmpresa(empresa.tipo);
+                
+                // Determinar ícono (puede venir con o sin 'fas fa-')
+                let iconClass = empresa.icono;
+                if (!iconClass.includes('fa-')) {
+                    iconClass = 'fas fa-' + iconClass;
+                } else if (!iconClass.includes('fas ')) {
+                    iconClass = 'fas ' + iconClass;
+                }
+                
+                card.innerHTML = `
+                    <div class="empresa-icon"><i class="${iconClass}"></i></div>
+                    <div class="empresa-name">${empresa.tipo}</div>
+                    <div class="empresa-desc">${empresa.descripcion || 'Servicios especializados'}</div>
+                `;
+                
+                empresaGrid.appendChild(card);
+            });
+            
+            console.log('✅ Empresas renderizadas:', appData.empresas.length);
+        }
 
         function selectEmpresa(tipo) {
             currentState.empresaSeleccionada = tipo;
+            
+            // Ocultar grid de empresas y mostrar formulario
+            document.getElementById('empresaGrid').style.display = 'none';
+            document.querySelector('h2').style.display = 'none'; // Ocultar título
+            document.getElementById('userDataForm').style.display = 'block';
+        }
+        
+        function startSurvey() {
+            // Capturar datos del usuario (opcional)
+            currentState.userName = document.getElementById('userName').value.trim() || 'Anónimo';
+            currentState.userEmail = document.getElementById('userEmail').value.trim() || '';
+            
             showScreen('loadingScreen');
             
             // Filtrar preguntas según tipo de empresa
             const preguntasFiltradas = appData.preguntas.filter(p => {
                 const tipos = p.tipo_empresa.split(',').map(t => t.trim());
-                return tipos.includes(tipo);
+                return tipos.includes(currentState.empresaSeleccionada);
             });
             
             currentState.preguntasFiltradas = preguntasFiltradas;
@@ -826,10 +907,14 @@
                 const dataToSave = {
                     timestamp: new Date().toISOString(),
                     tipo_empresa: currentState.empresaSeleccionada,
+                    nombre_usuario: currentState.userName || '',
+                    email_usuario: currentState.userEmail || '',
                     porcentaje_general: currentState.resultados.porcentajeGeneral,
                     nivel: currentState.resultados.nivel,
                     respuestas: currentState.respuestas
                 };
+                
+                console.log('💾 Guardando respuestas en Google Sheets...', dataToSave);
                 
                 await fetch(APPS_SCRIPT_URL, {
                     method: 'POST',
@@ -839,8 +924,10 @@
                     },
                     body: JSON.stringify(dataToSave)
                 });
+                
+                console.log('✅ Respuestas guardadas exitosamente');
             } catch (error) {
-                console.error('Error guardando en Sheets:', error);
+                console.error('❌ Error guardando en Sheets:', error);
             }
         }
 
