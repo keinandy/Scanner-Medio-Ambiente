@@ -768,7 +768,7 @@
             // Filtrar preguntas según tipo de empresa
             const preguntasFiltradas = appData.preguntas.filter(p => {
                 const tipos = p.tipo_empresa.split(',').map(t => t.trim());
-                return tipos.includes(currentState.empresaSeleccionada);
+                return tipos.includes(currentState.empresaSeleccionada) || tipos.includes('Todas');
             });
             
             currentState.preguntasFiltradas = preguntasFiltradas;
@@ -808,7 +808,42 @@
                 peso: pregunta.peso_puntos
             });
             
-            currentState.preguntaActual++;
+            // 🔥 LÓGICA DE PREGUNTA MADRE MEJORADA
+            // Si es pregunta -001 y responde NO, saltar todas las hijas
+            if (pregunta.id && pregunta.id.endsWith('-001') && !respuesta) {
+                console.log(`⏭️ Pregunta madre ${pregunta.id} respondida NO - saltando preguntas dependientes`);
+                
+                // Saltar todas las preguntas que tengan esta como pregunta_madre
+                let preguntasSaltadas = 0;
+                for (let i = currentState.preguntaActual + 1; i < currentState.preguntasFiltradas.length; i++) {
+                    const siguiente = currentState.preguntasFiltradas[i];
+                    
+                    // Verificar si depende de esta pregunta madre
+                    if (siguiente.pregunta_madre === pregunta.id) {
+                        // Auto-responder NO a las preguntas dependientes
+                        currentState.respuestas.push({
+                            id: siguiente.id,
+                            pregunta: siguiente.pregunta,
+                            categoria: siguiente.categoria,
+                            contexto_categoria: siguiente.contexto_categoria,
+                            recomendacion: siguiente.recomendacion_si_no,
+                            respuesta: false,
+                            peso: siguiente.peso_puntos,
+                            auto_skipped: true
+                        });
+                        preguntasSaltadas++;
+                    }
+                    // Si la siguiente pregunta es de otra categoría, terminar
+                    else if (siguiente.categoria !== pregunta.categoria) {
+                        break;
+                    }
+                }
+                
+                console.log(`   ⏩ ${preguntasSaltadas} preguntas dependientes saltadas automáticamente`);
+                currentState.preguntaActual += preguntasSaltadas + 1;
+            } else {
+                currentState.preguntaActual++;
+            }
             
             if (currentState.preguntaActual >= currentState.preguntasFiltradas.length) {
                 calculateResults();
