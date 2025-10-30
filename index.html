@@ -616,10 +616,14 @@
     <div class="header">
         <div class="header-content">
             <div class="logo">
-                <svg width="32" height="32" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="80" height="80" fill="#ffffff" rx="10"/>
-                    <path d="M20 30L40 50L60 20" stroke="#E74100" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
+                <!-- // Comentario: Contenedor del logo del header. Se llenará dinámicamente. -->
+                <div id="logoHeaderContainer" style="display: inline-flex; align-items: center;">
+                    <!-- // Comentario: Este es el logo SVG original que se usará si no hay URL en el Sheet -->
+                    <svg width="32" height="32" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="80" height="80" fill="#ffffff" rx="10"/>
+                        <path d="M20 30L40 50L60 20" stroke="#E74100" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
                 <span>COMPROMISO PRO</span>
                 <span style="color: var(--env-green); margin-left: 0.5rem;">| Medio Ambiente</span>
             </div>
@@ -633,7 +637,9 @@
         <!-- Welcome Screen -->
         <div id="welcomeScreen" class="screen active">
             <div class="welcome-screen">
-                <div style="display: flex; justify-content: center; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                <!-- // Comentario: Contenedor del logo de bienvenida. Se llenará dinámicamente. -->
+                <div id="logoWelcomeContainer" style="display: flex; justify-content: center; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                     <!-- // Comentario: Este es el logo Base64 original que se usará si no hay URL en el Sheet -->
                     <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iODAiIHZpZXdCb3g9IjAgMCA4MCA4MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iZ3JhZDEiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdHlsZT0ic3RvcC1jb2xvcjojMDA2NkRDO3N0b3Atb3BhY2l0eToxIiAvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiMwMDRBQUU7c3RvcC1vcGFjaXR5OjEiIC8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8cmVjdCB3aWR0aD0iODAiIGhlaWdodD0iODAiIGZpbGw9InVybCgjZ3JhZDEpIiByeD0iMTUiLz4KICA8cGF0aCBkPSJNMjAgMzBMNDAgNTBMNjAgMjAiIHN0cm9rZT0iI0U3NDEwMCIgc3Ryb2tlLXdpZHRoPSI2IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPC9zdmc+" alt="Compromiso Pro" style="width: 60px; height: 60px;">
                 </div>
                 <h1 class="welcome-title">Scanner de Medio Ambiente</h1>
@@ -789,7 +795,8 @@
             preguntas: [],
             herramientas: [],
             categorias: [],
-            empresas: []
+            empresas: [],
+            configuracion: {} // // Comentario: Añadido objeto para configuración
         };
         
         let currentState = {
@@ -824,11 +831,15 @@
                 
                 appData = data;
                 console.log('✅ Datos cargados exitosamente:');
-                console.log('   📝 Preguntas:', appData.preguntas.length);
-                console.log('   🔧 Herramientas:', appData.herramientas.length);
-                console.log('   📂 Categorías:', appData.categorias.length);
-                console.log('   🏢 Empresas:', appData.empresas.length);
+                console.log('  📝 Preguntas:', appData.preguntas.length);
+                console.log('  🔧 Herramientas:', appData.herramientas.length);
+                console.log('  📂 Categorías:', appData.categorias.length);
+                console.log('  🏢 Empresas:', appData.empresas.length);
+                console.log('  ⚙️ Configuración:', Object.keys(appData.configuracion || {}).length + ' parámetros'); // // Comentario: Log de config
                 
+                // // Comentario: Aplicar configuración (como logos)
+                aplicarConfiguracion(appData.configuracion);
+
                 // Renderizar empresas dinámicamente
                 renderEmpresas();
                 
@@ -836,11 +847,40 @@
                 console.error('❌ ERROR al cargar datos:', error);
                 console.error('📍 URL que falló:', APPS_SCRIPT_URL);
                 console.error('💡 Posibles causas:');
-                console.error('   1. El Apps Script no está desplegado como Web App');
-                console.error('   2. La URL del Apps Script es incorrecta');
-                console.error('   3. El Apps Script tiene errores');
-                console.error('   4. Problemas de CORS (poco probable)');
+                console.error('  1. El Apps Script no está desplegado como Web App');
+                console.error('  2. La URL del Apps Script es incorrecta');
+                console.error('  3. El Apps Script tiene errores');
+                console.error('  4. Problemas de CORS (poco probable)');
                 alert('Error al cargar el cuestionario. Revisa la consola (F12) para más detalles.');
+            }
+        }
+
+        // // Comentario: Nueva función para aplicar la configuración (logos)
+        function aplicarConfiguracion(config) {
+            if (!config) {
+                console.log('No se encontró objeto de configuración.');
+                return;
+            }
+
+            const logoUrl = config.URL_Logo;
+            
+            if (logoUrl && logoUrl.trim() !== '') {
+                console.log('⚙️ Aplicando URL_Logo:', logoUrl);
+                
+                // Aplicar a Header
+                const logoHeaderContainer = document.getElementById('logoHeaderContainer');
+                if (logoHeaderContainer) {
+                    logoHeaderContainer.innerHTML = `<img src="${logoUrl}" alt="Logo" style="height: 32px; width: auto; border-radius: 4px;">`;
+                }
+                
+                // Aplicar a Welcome
+                const logoWelcomeContainer = document.getElementById('logoWelcomeContainer');
+                if (logoWelcomeContainer) {
+                    logoWelcomeContainer.innerHTML = `<img src="${logoUrl}" alt="Logo" style="width: 60px; height: 60px; border-radius: 8px;">`;
+                }
+
+            } else {
+                console.log('⚙️ No se encontró URL_Logo, usando logos por defecto.');
             }
         }
         
@@ -993,7 +1033,7 @@
                 
                 if (preguntasDependientes.length > 0) {
                     console.log(`🔗 Pregunta madre ${pregunta.id} respondida NO`);
-                    console.log(`   Saltando ${preguntasDependientes.length} preguntas dependientes:`);
+                    console.log(`  Saltando ${preguntasDependientes.length} preguntas dependientes:`);
                     
                     preguntasDependientes.forEach(dep => {
                         // Marcar como saltada
@@ -1011,7 +1051,7 @@
                             auto_skipped: true
                         });
                         
-                        console.log(`   → ${dep.id}: auto-respondida NO`);
+                        console.log(`  → ${dep.id}: auto-respondida NO`);
                     });
                 }
                 
@@ -1043,7 +1083,7 @@
                                         peso: hija.peso_puntos,
                                         auto_skipped: true
                                     });
-                                    console.log(`   → ${hija.id}: auto-respondida NO (patrón -001)`);
+                                    console.log(`  → ${hija.id}: auto-respondida NO (patrón -001)`);
                                 }
                             }
                         });
@@ -1541,6 +1581,19 @@
             document.getElementById('userDataForm').style.display = 'none';
             document.getElementById('empresaGrid').style.display = 'grid';
             document.querySelector('h2').style.display = 'block';
+
+            // // Comentario: Restaurar logos originales al reiniciar
+            const logoHeaderContainer = document.getElementById('logoHeaderContainer');
+            if (logoHeaderContainer) {
+                logoHeaderContainer.innerHTML = `<svg width="32" height="32" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="80" height="80" fill="#ffffff" rx="10"/>
+                        <path d="M20 30L40 50L60 20" stroke="#E74100" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>`;
+            }
+            const logoWelcomeContainer = document.getElementById('logoWelcomeContainer');
+            if (logoWelcomeContainer) {
+                logoWelcomeContainer.innerHTML = `<img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iODAiIHZpZXdCb3g9IjAgMCA4MCA4MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iZ3JhZDEiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdHlsZT0ic3RvcC1jb2xvcjojMDA2NkRDO3N0b3Atb3BhY2l0eToxIiAvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiMwMDRBQUU7c3RvcC1vcGFjaXR5OjEiIC8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8cmVjdCB3aWR0aD0iODAiIGhlaWdodD0iODAiIGZpbGw9InVybCgjZ3JhZDEpIiByeD0iMTUiLz4KICA8cGF0aCBkPSJNMjAgMzBMNDAgNTBMNjAgMjAiIHN0cm9rZT0iI0U3NDEwMCIgc3Ryb2tlLXdpZHRoPSI2IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPC9zdmc+" alt="Compromiso Pro" style="width: 60px; height: 60px;">`;
+            }
         }
 
         // Cargar datos al iniciar
@@ -1550,3 +1603,4 @@
     </script>
 </body>
 </html>
+
