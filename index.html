@@ -47,6 +47,28 @@
         
         .action-buttons { display: flex; gap: 1rem; justify-content: center; margin-top: 3rem; flex-wrap: wrap; }
         
+        /* Inputs Mejorados */
+        .form-input {
+            width: 100%; 
+            padding: 12px; 
+            margin-bottom: 15px; 
+            border-radius: 8px; 
+            border: 1px solid #555; 
+            background: #1a1a1a; 
+            color: white;
+            font-size: 1rem;
+        }
+        .form-input:focus {
+            border-color: var(--primary-blue);
+            outline: none;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            color: #ccc;
+            font-size: 0.9rem;
+        }
+        
         /* Estilo original preservado */
         .info-boxes { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin: 2rem auto 3rem; max-width: 900px; }
         .info-box { background: var(--card-bg); border-radius: 12px; padding: 1.5rem; border: 1px solid var(--border-gray); }
@@ -80,7 +102,6 @@
         <div id="welcomeScreen" class="screen active">
             <div style="text-align: center; padding: 3rem 0;">
                 <div id="logoWelcomeContainer" style="margin-bottom: 1rem;">
-                    <!-- Logo SVG Grande original de respaldo -->
                     <svg width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
                         <rect width="80" height="80" fill="url(#grad1)" rx="15"/>
                         <defs><linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#0066DC;stop-opacity:1" /><stop offset="100%" style="stop-color:#004AAE;stop-opacity:1" /></linearGradient></defs>
@@ -92,7 +113,6 @@
                     Identifica en cuál de las 5 áreas ambientales debes enfocarte primero.
                 </p>
                 
-                <!-- Info Boxes Originales -->
                 <div class="info-boxes">
                     <div class="info-box">
                         <div class="info-box-title"><i class="fas fa-clipboard-check"></i> ¿Qué evaluaremos?</div>
@@ -110,11 +130,23 @@
                 <!-- Se llena con JS -->
             </div>
 
-            <!-- Formulario Datos Usuario -->
-            <div id="userDataForm" style="display: none; max-width: 400px; margin: 2rem auto; background: var(--card-bg); padding: 2rem; border-radius: 12px; border: 1px solid var(--border-gray);">
-                <h3 style="margin-bottom: 1rem; text-align: center;">Antes de empezar...</h3>
-                <input type="text" id="userName" placeholder="Tu Nombre" style="width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #444; background: #1a1a1a; color: white;">
-                <input type="email" id="userEmail" placeholder="Tu Email" style="width: 100%; padding: 12px; margin-bottom: 20px; border-radius: 8px; border: 1px solid #444; background: #1a1a1a; color: white;">
+            <!-- Formulario Datos Usuario (OBLIGATORIOS) -->
+            <div id="userDataForm" style="display: none; max-width: 450px; margin: 2rem auto; background: var(--card-bg); padding: 2rem; border-radius: 12px; border: 1px solid var(--border-gray);">
+                <h3 style="margin-bottom: 1.5rem; text-align: center; color: var(--primary-blue);">Completa tus datos para iniciar</h3>
+                
+                <label class="form-label">Nombre Completo *</label>
+                <input type="text" id="userName" class="form-input" placeholder="Ej: Juan Pérez">
+                
+                <label class="form-label">RUT Empresa *</label>
+                <input type="text" id="userRut" class="form-input" placeholder="Ej: 76.123.456-7">
+                
+                <label class="form-label">Correo Electrónico *</label>
+                <input type="email" id="userEmail" class="form-input" placeholder="Ej: contacto@empresa.cl">
+                
+                <div style="font-size: 0.8rem; color: #888; margin-bottom: 1.5rem;">
+                    * Campos obligatorios. El reporte final será enviado a este correo.
+                </div>
+
                 <button class="btn-primary" onclick="startSurvey()" style="width: 100%; justify-content: center;">
                     <i class="fas fa-play"></i> Comenzar Evaluación
                 </button>
@@ -151,6 +183,9 @@
                     <i class="fas fa-file-pdf"></i> Descargar Reporte PRO
                 </button>
             </div>
+            <p style="text-align: center; color: #888; margin-top: 1rem; font-size: 0.9rem;">
+                <i class="fas fa-envelope"></i> Al descargar, también recibirás una copia en tu correo.
+            </p>
         </div>
 
         <!-- LOADING -->
@@ -162,13 +197,12 @@
     </div>
 
     <script>
-        // ⚠️ URL DE TU SCRIPT (LA MISMA QUE TENÍAS)
+        // ⚠️ URL DE TU SCRIPT
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwvENq9VafApZYSosxk1_ACoIKlwy5_QDcY82Ek_Zv1REZO6OszjA0A6pYd44BqexDT/exec';
         
         let appData = {};
         let currentState = { respuestas: [], preguntasFiltradas: [], preguntaActual: 0 };
 
-        // 1. INICIALIZACIÓN
         window.addEventListener('DOMContentLoaded', loadData);
 
         async function loadData() {
@@ -176,23 +210,19 @@
                 const res = await fetch(APPS_SCRIPT_URL);
                 const data = await res.json();
                 appData = data;
-                
-                // Aplicar Logo si viene en configuración
                 if (appData.configuracion && appData.configuracion.URL_Logo) {
                     const url = appData.configuracion.URL_Logo;
                     document.getElementById('logoHeaderContainer').innerHTML = `<img src="${url}" style="height: 32px; border-radius: 4px;">`;
                     document.getElementById('logoWelcomeContainer').innerHTML = `<img src="${url}" style="height: 80px; border-radius: 8px;">`;
                 }
-
                 renderEmpresas();
-                console.log("Datos cargados correctamente.");
+                console.log("Datos cargados.");
             } catch (e) {
                 console.error(e);
-                alert("Error cargando datos. Revisa la conexión o el Script.");
+                alert("Error cargando datos. Revisa la conexión.");
             }
         }
 
-        // 2. RENDERIZADO EMPRESAS
         function renderEmpresas() {
             const grid = document.getElementById('empresaGrid');
             grid.innerHTML = '';
@@ -215,22 +245,36 @@
             });
         }
 
-        // 3. LÓGICA DE ENCUESTA
         function startSurvey() {
-            currentState.userName = document.getElementById('userName').value;
-            currentState.userEmail = document.getElementById('userEmail').value;
+            // 1. CAPTURA DE DATOS
+            const nombre = document.getElementById('userName').value.trim();
+            const rut = document.getElementById('userRut').value.trim();
+            const email = document.getElementById('userEmail').value.trim();
+
+            // 2. VALIDACIÓN OBLIGATORIA
+            if (!nombre || !rut || !email) {
+                alert("⚠️ Por favor, completa todos los campos obligatorios (*).\nSon necesarios para generar tu reporte personalizado.");
+                return; // Detiene la función
+            }
+            if (!email.includes('@')) {
+                alert("⚠️ Por favor ingresa un correo electrónico válido.");
+                return;
+            }
+
+            // Guardamos en el estado global
+            currentState.userName = nombre;
+            currentState.userRut = rut;
+            currentState.userEmail = email;
             
-            // FILTRO INTELIGENTE
+            // 3. INICIO LÓGICA PREGUNTAS
             currentState.preguntasFiltradas = appData.preguntas.filter(p => {
-                if (!p.tipo_empresa) return false; // Seguridad por si viene vacío
+                if (!p.tipo_empresa) return false; 
                 const tipos = p.tipo_empresa.split(',').map(t => t.trim());
                 return tipos.includes(currentState.empresaSeleccionada) || tipos.includes('Todas');
             }).sort((a,b) => a.orden - b.orden);
 
-            // 🛡️ SEGURIDAD: Si no hay preguntas para esa empresa
             if (currentState.preguntasFiltradas.length === 0) {
-                alert(`⚠️ No se encontraron preguntas configuradas para "${currentState.empresaSeleccionada}" en el Excel.\n\nVerifica la columna 'Tipo_Empresa' en la hoja Preguntas.`);
-                document.getElementById('loadingScreen').classList.remove('active');
+                alert(`⚠️ No se encontraron preguntas para "${currentState.empresaSeleccionada}". Revisa el Excel.`);
                 return;
             }
 
@@ -244,14 +288,11 @@
 
         function renderQuestion() {
             const p = currentState.preguntasFiltradas[currentState.preguntaActual];
-            
-            // Salto automático si ya fue marcada (dependencia)
             if (currentState.saltadas.has(p.id)) {
                 currentState.preguntaActual++;
                 if (currentState.preguntaActual >= currentState.preguntasFiltradas.length) return finishSurvey();
                 return renderQuestion();
             }
-
             document.getElementById('rutaBadge').innerText = p.categoria;
             document.getElementById('questionText').innerText = p.pregunta;
             document.getElementById('currentQ').innerText = currentState.preguntaActual + 1;
@@ -260,17 +301,10 @@
 
         function answerQuestion(val) {
             const p = currentState.preguntasFiltradas[currentState.preguntaActual];
-            
             currentState.respuestas.push({
-                id: p.id,
-                categoria: p.categoria,
-                pregunta: p.pregunta,
-                recomendacion: p.recomendacion_si_no,
-                peso: p.peso,
-                respuesta: val
+                id: p.id, categoria: p.categoria, pregunta: p.pregunta,
+                recomendacion: p.recomendacion_si_no, peso: p.peso, respuesta: val
             });
-
-            // Lógica Madre-Hija (Si responde NO a la madre, saltar hijas)
             if (!val && p.id) {
                  const hijas = currentState.preguntasFiltradas.filter(h => h.madre === p.id);
                  hijas.forEach(h => {
@@ -278,43 +312,30 @@
                      currentState.respuestas.push({id: h.id, categoria:h.categoria, respuesta: false, peso: h.peso, skipped: true});
                  });
             }
-
             currentState.preguntaActual++;
-            if (currentState.preguntaActual >= currentState.preguntasFiltradas.length) {
-                finishSurvey();
-            } else {
-                renderQuestion();
-            }
+            if (currentState.preguntaActual >= currentState.preguntasFiltradas.length) finishSurvey();
+            else renderQuestion();
         }
 
-        // 4. RESULTADOS
         function finishSurvey() {
             showScreen('loadingScreen');
-            
             let total = 0, obtained = 0;
             currentState.respuestas.forEach(r => {
                 if (!r.skipped) total += (r.peso || 0);
                 if (r.respuesta) obtained += (r.peso || 0);
             });
-
             const score = total === 0 ? 0 : Math.round((obtained/total)*100);
-            
-            // Niveles
             let nivel = "INICIAL", clase = "nivel-inicial", msg = "Estás comenzando tu camino.";
             if(score >= 40) { nivel = "REGULAR"; clase = "nivel-regular"; msg = "Tienes avances, pero falta estructura."; }
             if(score >= 60) { nivel = "BUENO"; clase = "nivel-bueno"; msg = "Buen camino, enfócate en certificar."; }
             if(score >= 80) { nivel = "EXCELENTE"; clase = "nivel-excelente"; msg = "Líder en sostenibilidad."; }
 
             currentState.resultados = { score, nivel, msg };
-
             document.getElementById('nivelBadge').innerText = nivel;
             document.getElementById('nivelBadge').className = `nivel-badge ${clase}`;
             document.getElementById('scoreDisplay').innerText = score + '%';
             document.getElementById('orientationMessage').innerText = msg;
-
-            // Guardar datos
             saveData(score, nivel);
-
             setTimeout(() => showScreen('resultsScreen'), 1000);
         }
 
@@ -328,37 +349,26 @@
                 nivel: nivel,
                 respuestas: currentState.respuestas
             };
-            // Usamos no-cors porque solo enviamos datos, no necesitamos respuesta
             fetch(APPS_SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
         }
 
-        // 5. GENERAR PDF PRO
         function generarPDFPro() {
             const btn = event.currentTarget;
             const original = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando y Enviando...';
             btn.disabled = true;
 
             const falladas = currentState.respuestas.filter(r => r.respuesta === false && !r.skipped);
-            
             const recomendaciones = falladas.map(f => {
                 const tools = appData.herramientas.filter(h => 
                     h.id_vinculados && h.id_vinculados.includes(f.id)
                 ).map(h => ({
-                    nombre: h.nombre,
-                    uso: h.desc_uso || "",
-                    url: h.url || "",
-                    tipo: h.tipo,
-                    duracion: h.duracion,
-                    costo: h.costo,
-                    nivel: h.nivel
+                    nombre: h.nombre, uso: h.desc_uso || "", url: h.url || "",
+                    tipo: h.tipo, duracion: h.duracion, costo: h.costo, nivel: h.nivel
                 }));
-
                 return {
-                    categoria: f.categoria,
-                    pregunta: f.pregunta,
-                    consejo: f.recomendacion || "Revisar manuales.",
-                    herramientas: tools
+                    categoria: f.categoria, pregunta: f.pregunta,
+                    consejo: f.recomendacion || "Revisar manuales.", herramientas: tools
                 };
             });
 
@@ -368,6 +378,8 @@
                     fecha: new Date().toLocaleDateString(),
                     empresa: currentState.empresaSeleccionada,
                     usuario: currentState.userName,
+                    email_usuario: currentState.userEmail, // DATO CLAVE PARA EL EMAIL
+                    rut_empresa: currentState.userRut,
                     nivel: currentState.resultados.nivel,
                     puntaje: currentState.resultados.score.toString(),
                     mensaje_orientacion: currentState.resultados.msg
@@ -378,7 +390,10 @@
             fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) })
                 .then(r => r.json())
                 .then(d => {
-                    if(d.status === 'success') downloadBase64(d.base64, d.nombreArchivo);
+                    if(d.status === 'success') {
+                        downloadBase64(d.base64, d.nombreArchivo);
+                        alert("✅ ¡Listo! Reporte descargado y enviado a tu correo.");
+                    }
                     else alert("Error: " + d.message);
                     btn.innerHTML = original; btn.disabled = false;
                 })
