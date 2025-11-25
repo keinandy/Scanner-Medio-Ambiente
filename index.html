@@ -47,29 +47,11 @@
         
         .action-buttons { display: flex; gap: 1rem; justify-content: center; margin-top: 3rem; flex-wrap: wrap; }
         
-        /* Inputs Mejorados */
-        .form-input {
-            width: 100%; 
-            padding: 12px; 
-            margin-bottom: 15px; 
-            border-radius: 8px; 
-            border: 1px solid #555; 
-            background: #1a1a1a; 
-            color: white;
-            font-size: 1rem;
-        }
-        .form-input:focus {
-            border-color: var(--primary-blue);
-            outline: none;
-        }
-        .form-label {
-            display: block;
-            margin-bottom: 5px;
-            color: #ccc;
-            font-size: 0.9rem;
-        }
+        .form-input { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #555; background: #1a1a1a; color: white; font-size: 1rem; }
+        .form-input:focus { border-color: var(--primary-blue); outline: none; }
+        .form-label { display: block; margin-bottom: 5px; color: #ccc; font-size: 0.9rem; }
         
-        /* Estilo original preservado */
+        /* Estilo original */
         .info-boxes { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin: 2rem auto 3rem; max-width: 900px; }
         .info-box { background: var(--card-bg); border-radius: 12px; padding: 1.5rem; border: 1px solid var(--border-gray); }
         .info-box-title { color: var(--primary-orange); font-weight: 600; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; }
@@ -82,7 +64,6 @@
         <div class="header-content">
             <div class="logo">
                 <div id="logoHeaderContainer">
-                    <!-- Logo SVG original de respaldo -->
                     <svg width="32" height="32" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
                         <rect width="80" height="80" fill="#ffffff" rx="10"/>
                         <path d="M20 30L40 50L60 20" stroke="#E74100" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
@@ -254,14 +235,13 @@
             // 2. VALIDACIÓN OBLIGATORIA
             if (!nombre || !rut || !email) {
                 alert("⚠️ Por favor, completa todos los campos obligatorios (*).\nSon necesarios para generar tu reporte personalizado.");
-                return; // Detiene la función
+                return;
             }
             if (!email.includes('@')) {
                 alert("⚠️ Por favor ingresa un correo electrónico válido.");
                 return;
             }
 
-            // Guardamos en el estado global
             currentState.userName = nombre;
             currentState.userRut = rut;
             currentState.userEmail = email;
@@ -273,8 +253,9 @@
                 return tipos.includes(currentState.empresaSeleccionada) || tipos.includes('Todas');
             }).sort((a,b) => a.orden - b.orden);
 
+            // 🛡️ BLOQUE DE SEGURIDAD
             if (currentState.preguntasFiltradas.length === 0) {
-                alert(`⚠️ No se encontraron preguntas para "${currentState.empresaSeleccionada}". Revisa el Excel.`);
+                alert(`⚠️ No se encontraron preguntas para "${currentState.empresaSeleccionada}".\nPosible error en la configuración del Excel (Columna H).`);
                 return;
             }
 
@@ -378,7 +359,7 @@
                     fecha: new Date().toLocaleDateString(),
                     empresa: currentState.empresaSeleccionada,
                     usuario: currentState.userName,
-                    email_usuario: currentState.userEmail, // DATO CLAVE PARA EL EMAIL
+                    email_usuario: currentState.userEmail,
                     rut_empresa: currentState.userRut,
                     nivel: currentState.resultados.nivel,
                     puntaje: currentState.resultados.score.toString(),
