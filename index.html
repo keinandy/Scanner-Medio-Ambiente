@@ -46,6 +46,11 @@
         .nivel-inicial { background: #666; }
         
         .action-buttons { display: flex; gap: 1rem; justify-content: center; margin-top: 3rem; flex-wrap: wrap; }
+        
+        /* Estilo original preservado */
+        .info-boxes { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin: 2rem auto 3rem; max-width: 900px; }
+        .info-box { background: var(--card-bg); border-radius: 12px; padding: 1.5rem; border: 1px solid var(--border-gray); }
+        .info-box-title { color: var(--primary-orange); font-weight: 600; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; }
     </style>
 </head>
 <body>
@@ -55,12 +60,16 @@
         <div class="header-content">
             <div class="logo">
                 <div id="logoHeaderContainer">
-                    <i class="fas fa-leaf" style="color: var(--env-green);"></i>
+                    <!-- Logo SVG original de respaldo -->
+                    <svg width="32" height="32" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="80" height="80" fill="#ffffff" rx="10"/>
+                        <path d="M20 30L40 50L60 20" stroke="#E74100" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
                 </div>
                 <span style="margin-left: 10px;">COMPROMISO PRO</span>
             </div>
             <div style="font-size: 0.9rem; color: rgba(255,255,255,0.7);">
-                Pregunta <span id="currentQ">0</span> / <span id="totalQ">0</span>
+                <span id="currentQ">0</span> / <span id="totalQ">0</span>
             </div>
         </div>
     </div>
@@ -70,34 +79,52 @@
         <!-- PANTALLA 1: BIENVENIDA -->
         <div id="welcomeScreen" class="screen active">
             <div style="text-align: center; padding: 3rem 0;">
-                <!-- Logo dinámico bienvenida -->
                 <div id="logoWelcomeContainer" style="margin-bottom: 1rem;">
-                    <i class="fas fa-leaf" style="font-size: 4rem; color: var(--env-green);"></i>
+                    <!-- Logo SVG Grande original de respaldo -->
+                    <svg width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="80" height="80" fill="url(#grad1)" rx="15"/>
+                        <defs><linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#0066DC;stop-opacity:1" /><stop offset="100%" style="stop-color:#004AAE;stop-opacity:1" /></linearGradient></defs>
+                        <path d="M20 30L40 50L60 20" stroke="#E74100" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
                 </div>
                 <h1 style="font-size: 3rem; margin-bottom: 1rem;">SCANNER AMBIENTAL</h1>
                 <p style="color: var(--text-gray); font-size: 1.2rem; max-width: 600px; margin: 0 auto;">
-                    Diagnóstico rápido para empresas de construcción. Identifica brechas y recibe un plan de acción inmediato.
+                    Identifica en cuál de las 5 áreas ambientales debes enfocarte primero.
                 </p>
+                
+                <!-- Info Boxes Originales -->
+                <div class="info-boxes">
+                    <div class="info-box">
+                        <div class="info-box-title"><i class="fas fa-clipboard-check"></i> ¿Qué evaluaremos?</div>
+                        <div style="color: #999; font-size: 0.9rem;">Gestión de residuos, Eficiencia hídrica, Certificaciones, Huella de carbono, Energía.</div>
+                    </div>
+                    <div class="info-box">
+                        <div class="info-box-title"><i class="fas fa-clock"></i> Tiempo</div>
+                        <div style="color: #999; font-size: 0.9rem;">5 minutos. Recibirás priorización y reporte PDF.</div>
+                    </div>
+                </div>
             </div>
             
-            <h2 style="text-align: center; margin-top: 2rem;">Selecciona tu rubro:</h2>
+            <h2 style="text-align: center; margin-top: 1rem;">Selecciona tu tipo de empresa:</h2>
             <div class="empresa-grid" id="empresaGrid">
                 <!-- Se llena con JS -->
             </div>
 
             <!-- Formulario Datos Usuario -->
-            <div id="userDataForm" style="display: none; max-width: 400px; margin: 2rem auto; background: var(--card-bg); padding: 2rem; border-radius: 12px;">
-                <h3 style="margin-bottom: 1rem;">Datos de Contacto</h3>
-                <input type="text" id="userName" placeholder="Tu Nombre" style="width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 6px; border:none;">
-                <input type="email" id="userEmail" placeholder="Tu Email" style="width: 100%; padding: 10px; margin-bottom: 20px; border-radius: 6px; border:none;">
-                <button class="btn-primary" onclick="startSurvey()" style="width: 100%; justify-content: center;">Comenzar</button>
+            <div id="userDataForm" style="display: none; max-width: 400px; margin: 2rem auto; background: var(--card-bg); padding: 2rem; border-radius: 12px; border: 1px solid var(--border-gray);">
+                <h3 style="margin-bottom: 1rem; text-align: center;">Antes de empezar...</h3>
+                <input type="text" id="userName" placeholder="Tu Nombre" style="width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #444; background: #1a1a1a; color: white;">
+                <input type="email" id="userEmail" placeholder="Tu Email" style="width: 100%; padding: 12px; margin-bottom: 20px; border-radius: 8px; border: 1px solid #444; background: #1a1a1a; color: white;">
+                <button class="btn-primary" onclick="startSurvey()" style="width: 100%; justify-content: center;">
+                    <i class="fas fa-play"></i> Comenzar Evaluación
+                </button>
             </div>
         </div>
 
         <!-- PANTALLA 2: PREGUNTAS -->
         <div id="questionScreen" class="screen">
             <div class="question-container">
-                <span id="rutaBadge" style="color: var(--primary-blue); font-weight: 700; text-transform: uppercase;">CATEGORÍA</span>
+                <span id="rutaBadge" style="color: var(--primary-blue); font-weight: 700; text-transform: uppercase; display: block; margin-bottom: 10px;">CATEGORÍA</span>
                 <div class="question-text" id="questionText">...</div>
                 <div class="answer-buttons">
                     <button class="btn-answer si" onclick="answerQuestion(true)"><i class="fas fa-check"></i> SÍ</button>
@@ -120,7 +147,6 @@
                     <i class="fas fa-redo"></i> Nueva Evaluación
                 </button>
                 
-                <!-- BOTÓN PDF PRO (Nuevo) -->
                 <button class="btn-primary" onclick="generarPDFPro()" style="background: linear-gradient(135deg, #28a745, #218838);">
                     <i class="fas fa-file-pdf"></i> Descargar Reporte PRO
                 </button>
@@ -130,19 +156,19 @@
         <!-- LOADING -->
         <div id="loadingScreen" class="screen" style="text-align: center; padding-top: 5rem;">
             <i class="fas fa-circle-notch fa-spin" style="font-size: 3rem; color: var(--primary-blue);"></i>
-            <p style="margin-top: 1rem;">Procesando...</p>
+            <p style="margin-top: 1rem;">Procesando datos...</p>
         </div>
 
     </div>
 
     <script>
-        // ⚠️ REEMPLAZA CON TU URL DE APPS SCRIPT (Web App URL)
+        // ⚠️ URL DE TU SCRIPT (LA MISMA QUE TENÍAS)
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwvENq9VafApZYSosxk1_ACoIKlwy5_QDcY82Ek_Zv1REZO6OszjA0A6pYd44BqexDT/exec';
         
         let appData = {};
         let currentState = { respuestas: [], preguntasFiltradas: [], preguntaActual: 0 };
 
-        // 1. INICIALIZACIÓN Y LOGOS
+        // 1. INICIALIZACIÓN
         window.addEventListener('DOMContentLoaded', loadData);
 
         async function loadData() {
@@ -159,21 +185,22 @@
                 }
 
                 renderEmpresas();
-                console.log("Datos cargados OK");
+                console.log("Datos cargados correctamente.");
             } catch (e) {
                 console.error(e);
-                alert("Error cargando datos. Revisa la conexión.");
+                alert("Error cargando datos. Revisa la conexión o el Script.");
             }
         }
 
-        // 2. RENDERIZADO
+        // 2. RENDERIZADO EMPRESAS
         function renderEmpresas() {
             const grid = document.getElementById('empresaGrid');
             grid.innerHTML = '';
+            if (!appData.empresas) return;
+            
             appData.empresas.forEach(emp => {
                 const div = document.createElement('div');
                 div.className = 'empresa-card';
-                // Manejo de iconos FontAwesome
                 let icon = emp.icono || 'fa-building';
                 if (!icon.includes('fa-')) icon = 'fa-' + icon;
                 
@@ -193,11 +220,19 @@
             currentState.userName = document.getElementById('userName').value;
             currentState.userEmail = document.getElementById('userEmail').value;
             
-            // FILTRO INTELIGENTE (Incluye "Especialidades" y "Todas")
+            // FILTRO INTELIGENTE
             currentState.preguntasFiltradas = appData.preguntas.filter(p => {
+                if (!p.tipo_empresa) return false; // Seguridad por si viene vacío
                 const tipos = p.tipo_empresa.split(',').map(t => t.trim());
                 return tipos.includes(currentState.empresaSeleccionada) || tipos.includes('Todas');
             }).sort((a,b) => a.orden - b.orden);
+
+            // 🛡️ SEGURIDAD: Si no hay preguntas para esa empresa
+            if (currentState.preguntasFiltradas.length === 0) {
+                alert(`⚠️ No se encontraron preguntas configuradas para "${currentState.empresaSeleccionada}" en el Excel.\n\nVerifica la columna 'Tipo_Empresa' en la hoja Preguntas.`);
+                document.getElementById('loadingScreen').classList.remove('active');
+                return;
+            }
 
             currentState.preguntaActual = 0;
             currentState.respuestas = [];
@@ -210,7 +245,7 @@
         function renderQuestion() {
             const p = currentState.preguntasFiltradas[currentState.preguntaActual];
             
-            // Salto de preguntas ya procesadas (dependencias)
+            // Salto automático si ya fue marcada (dependencia)
             if (currentState.saltadas.has(p.id)) {
                 currentState.preguntaActual++;
                 if (currentState.preguntaActual >= currentState.preguntasFiltradas.length) return finishSurvey();
@@ -235,7 +270,7 @@
                 respuesta: val
             });
 
-            // Lógica "Madre-Hija": Si responde NO a la madre, salta las hijas
+            // Lógica Madre-Hija (Si responde NO a la madre, saltar hijas)
             if (!val && p.id) {
                  const hijas = currentState.preguntasFiltradas.filter(h => h.madre === p.id);
                  hijas.forEach(h => {
@@ -252,7 +287,7 @@
             }
         }
 
-        // 4. RESULTADOS Y GUARDADO
+        // 4. RESULTADOS
         function finishSurvey() {
             showScreen('loadingScreen');
             
@@ -264,8 +299,8 @@
 
             const score = total === 0 ? 0 : Math.round((obtained/total)*100);
             
-            // Lógica de Niveles (configurable desde Excel si se quisiera, aquí hardcoded por seguridad)
-            let nivel = "INICIAL", clase = "nivel-inicial", msg = "Estás comenzando.";
+            // Niveles
+            let nivel = "INICIAL", clase = "nivel-inicial", msg = "Estás comenzando tu camino.";
             if(score >= 40) { nivel = "REGULAR"; clase = "nivel-regular"; msg = "Tienes avances, pero falta estructura."; }
             if(score >= 60) { nivel = "BUENO"; clase = "nivel-bueno"; msg = "Buen camino, enfócate en certificar."; }
             if(score >= 80) { nivel = "EXCELENTE"; clase = "nivel-excelente"; msg = "Líder en sostenibilidad."; }
@@ -277,7 +312,7 @@
             document.getElementById('scoreDisplay').innerText = score + '%';
             document.getElementById('orientationMessage').innerText = msg;
 
-            // Guardado asíncrono
+            // Guardar datos
             saveData(score, nivel);
 
             setTimeout(() => showScreen('resultsScreen'), 1000);
@@ -293,27 +328,26 @@
                 nivel: nivel,
                 respuestas: currentState.respuestas
             };
-            fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+            // Usamos no-cors porque solo enviamos datos, no necesitamos respuesta
+            fetch(APPS_SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
         }
 
-        // 5. GENERACIÓN DE PDF PRO
+        // 5. GENERAR PDF PRO
         function generarPDFPro() {
             const btn = event.currentTarget;
             const original = btn.innerHTML;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando...';
             btn.disabled = true;
 
-            // Preparación de datos (Mapping avanzado)
             const falladas = currentState.respuestas.filter(r => r.respuesta === false && !r.skipped);
             
             const recomendaciones = falladas.map(f => {
-                // Buscar herramientas vinculadas
                 const tools = appData.herramientas.filter(h => 
                     h.id_vinculados && h.id_vinculados.includes(f.id)
                 ).map(h => ({
                     nombre: h.nombre,
-                    uso: h.desc_uso || "",      // Columna E del Excel
-                    url: h.url || "",           // Columna G del Excel
+                    uso: h.desc_uso || "",
+                    url: h.url || "",
                     tipo: h.tipo,
                     duracion: h.duracion,
                     costo: h.costo,
@@ -329,7 +363,7 @@
             });
 
             const payload = {
-                action: 'generar_pdf', // Señal al Router
+                action: 'generar_pdf',
                 meta: {
                     fecha: new Date().toLocaleDateString(),
                     empresa: currentState.empresaSeleccionada,
@@ -349,7 +383,7 @@
                     btn.innerHTML = original; btn.disabled = false;
                 })
                 .catch(e => {
-                    alert("Error de conexión");
+                    alert("Error de conexión. Revisa tu internet.");
                     btn.innerHTML = original; btn.disabled = false;
                 });
         }
