@@ -4,1603 +4,368 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🌱 Scanner Ambiental - Diagnóstico Empresarial</title>
-    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    
     <style>
         :root {
-            /* Colores principales Compromiso Pro */
-            --primary-blue: #0066DC;
-            --primary-orange: #E74100;
-            
-            /* Verde para medio ambiente (más sutil) */
-            --env-green: #B2BF30; /* Similar al verde del manual */
-            --env-green-dark: #8FA024;
-            --env-green-light: #E8EDC7;
-            
-            /* Escala de grises corporativos */
-            --dark-bg: #2D2D2D;
-            --darker-bg: #1A1A1A;
-            --text-light: #FFFFFF;
-            --text-gray: #999999;
-            --border-gray: #444444;
-            --card-bg: #333333;
-            
-            /* Estados */
-            --success-color: #B2BF30;
-            --warning-color: #E74100;
-            --error-color: #C0392B;
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, var(--darker-bg) 0%, var(--dark-bg) 100%);
-            color: var(--text-light);
-            min-height: 100vh;
-        }
-        
-        .header {
-            background: linear-gradient(135deg, var(--primary-blue) 0%, #004AAE 100%);
-            backdrop-filter: blur(20px);
-            border-bottom: 2px solid var(--primary-orange);
-            padding: 1.5rem 0;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 2px 20px rgba(0, 102, 220, 0.3);
-        }
-        
-        .header-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text-light);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .logo i {
-            color: var(--env-green);
-            filter: drop-shadow(0 0 8px rgba(178, 191, 48, 0.5));
-        }
-        
-        .progress-info {
-            font-size: 0.875rem;
-            color: var(--text-gray);
-            display: none;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-        
-        .screen {
-            display: none;
-            animation: fadeIn 0.5s ease;
-        }
-        
-        .screen.active {
-            display: block;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .welcome-screen {
-            text-align: center;
-            padding: 3rem 2rem;
-        }
-        
-        .welcome-title {
-            font-size: 3rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            background: linear-gradient(135deg, var(--primary-blue), var(--primary-orange));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        
-        .welcome-subtitle {
-            font-size: 1.2rem;
-            color: var(--text-gray);
-            margin-bottom: 2rem;
-            max-width: 700px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        
-        .info-boxes {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-            margin: 2rem auto 3rem;
-            max-width: 900px;
-        }
-        
-        .info-box {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 1.5rem;
-            border: 1px solid var(--border-gray);
-            text-align: left;
-            transition: all 0.3s ease;
-        }
-        
-        .info-box:hover {
-            border-color: var(--primary-orange);
-            box-shadow: 0 5px 15px rgba(231, 65, 0, 0.2);
-        }
-        
-        .info-box-title {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 0.75rem;
-            color: var(--primary-orange);
-        }
-        
-        .info-box-content {
-            color: var(--text-gray);
-            font-size: 0.95rem;
-            line-height: 1.6;
-        }
-        
-        .empresa-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-            margin-top: 2rem;
-            max-width: 900px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        
-        .empresa-card {
-            background: var(--card-bg);
-            border: 2px solid var(--border-gray);
-            border-radius: 12px;
-            padding: 2rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .empresa-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: linear-gradient(90deg, var(--primary-blue), var(--primary-orange));
-            transform: translateX(-100%);
-            transition: transform 0.3s ease;
-        }
-        
-        .empresa-card:hover {
-            transform: translateY(-4px);
-            border-color: var(--primary-blue);
-            box-shadow: 0 10px 25px rgba(0, 102, 220, 0.3);
-        }
-        
-        .empresa-card:hover::before {
-            transform: translateX(0);
-        }
-        
-        .empresa-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            color: var(--primary-blue);
-            transition: all 0.3s ease;
-        }
-        
-        .empresa-card:hover .empresa-icon {
-            color: var(--primary-orange);
-            transform: scale(1.1);
-        }
-        
-        .empresa-icon i {
-            font-size: 3rem;
-        }
-        
-        .empresa-name {
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-        
-        .empresa-desc {
-            font-size: 0.875rem;
-            color: var(--text-gray);
-        }
-        
-        .question-container {
-            max-width: 800px;
-            margin: 2rem auto;
-            background: var(--card-bg);
-            border-radius: 16px;
-            padding: 3rem;
-            border: 1px solid var(--border-gray);
-        }
-        
-        .ruta-badge {
-            display: inline-block;
-            background: linear-gradient(135deg, var(--primary-blue), #004AAE);
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.875rem;
-            margin-bottom: 1.5rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            box-shadow: 0 2px 10px rgba(0, 102, 220, 0.3);
-        }
-        
-        .question-text {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 2rem;
-            line-height: 1.5;
-        }
-        
-        .answer-buttons {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-        }
-        
-        .btn-answer {
-            flex: 1;
-            max-width: 200px;
-            padding: 1.5rem;
-            font-size: 1.25rem;
-            font-weight: 600;
-            border: 2px solid var(--border-gray);
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            background: var(--darker-bg);
-            color: var(--text-light);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .btn-answer::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            transition: width 0.6s ease, height 0.6s ease;
-        }
-        
-        .btn-answer:hover::before {
-            width: 300px;
-            height: 300px;
-        }
-        
-        .btn-answer:hover {
-            transform: scale(1.05);
-            color: white;
-        }
-        
-        .btn-answer.si {
-            border-color: var(--env-green);
-        }
-        
-        .btn-answer.si::before {
-            background: var(--env-green);
-        }
-        
-        .btn-answer.si:hover {
-            border-color: var(--env-green);
-            box-shadow: 0 5px 20px rgba(178, 191, 48, 0.4);
-        }
-        
-        .btn-answer.no {
-            border-color: var(--primary-orange);
-        }
-        
-        .btn-answer.no::before {
-            background: var(--primary-orange);
-        }
-        
-        .btn-answer.no:hover {
-            border-color: var(--primary-orange);
-            box-shadow: 0 5px 20px rgba(231, 65, 0, 0.4);
-        }
-        
-        .btn-answer i {
-            position: relative;
-            z-index: 1;
-        }
-        
-        .btn-answer span {
-            position: relative;
-            z-index: 1;
-        }
-        
-        .results-header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-        
-        .results-title {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-        }
-        
-        .nivel-badge {
-            display: inline-block;
-            font-size: 1.5rem;
-            padding: 1rem 2rem;
-            border-radius: 12px;
-            margin: 1rem 0;
-        }
-        
-        .nivel-excelente {
-            background: linear-gradient(135deg, var(--env-green), var(--env-green-dark));
-            box-shadow: 0 4px 15px rgba(178, 191, 48, 0.3);
-        }
-        
-        .nivel-bueno {
-            background: linear-gradient(135deg, var(--primary-blue), #004AAE);
-            box-shadow: 0 4px 15px rgba(0, 102, 220, 0.3);
-        }
-        
-        .nivel-regular {
-            background: linear-gradient(135deg, var(--primary-orange), #B93300);
-            box-shadow: 0 4px 15px rgba(231, 65, 0, 0.3);
-        }
-        
-        .nivel-inicial {
-            background: linear-gradient(135deg, #666666, #333333);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-        }
-        
-        .orientation-message {
-            background: linear-gradient(135deg, var(--card-bg), #2A2A2A);
-            border-left: 4px solid var(--primary-blue);
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin: 2rem auto;
-            max-width: 800px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-        }
-        
-        .orientation-message h3 {
-            color: var(--primary-blue);
-            margin-bottom: 0.75rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .orientation-message p {
-            color: var(--text-gray);
-            line-height: 1.6;
-        }
-        
-        .gauge-container {
-            max-width: 400px;
-            margin: 2rem auto;
-            background: var(--card-bg);
-            padding: 2rem;
-            border-radius: 16px;
-            border: 1px solid var(--border-gray);
-        }
-        
-        .priority-section {
-            margin: 3rem 0;
-        }
-        
-        .priority-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-        
-        .priority-title.urgente {
-            color: var(--primary-orange);
-        }
-        
-        .priority-title.mejorable {
-            color: var(--primary-blue);
-        }
-        
-        .priority-title.mantener {
-            color: var(--env-green);
-        }
-        
-        .priority-cards {
-            display: grid;
-            gap: 1rem;
-        }
-        
-        .priority-card {
-            background: linear-gradient(135deg, var(--card-bg), #2A2A2A);
-            border-radius: 12px;
-            padding: 1.5rem;
-            border-left: 4px solid;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease;
-        }
-        
-        .priority-card:hover {
-            transform: translateX(5px);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-        }
-        
-        .priority-card.urgente {
-            border-left-color: var(--primary-orange);
-        }
-        
-        .priority-card.urgente:hover {
-            box-shadow: 0 4px 20px rgba(231, 65, 0, 0.3);
-        }
-        
-        .priority-card.mejorable {
-            border-left-color: var(--primary-blue);
-        }
-        
-        .priority-card.mejorable:hover {
-            box-shadow: 0 4px 20px rgba(0, 102, 220, 0.3);
-        }
-        
-        .priority-card.mantener {
-            border-left-color: var(--env-green);
-        }
-        
-        .priority-card.mantener:hover {
-            box-shadow: 0 4px 20px rgba(178, 191, 48, 0.3);
-        }
-        
-        .priority-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-        
-        .priority-card-name {
-            font-size: 1.2rem;
-            font-weight: 600;
-        }
-        
-        .priority-card-percentage {
-            font-size: 1.5rem;
-            font-weight: 700;
-        }
-        
-        .priority-card-why {
-            background: rgba(0, 0, 0, 0.2);
-            padding: 0.75rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            font-size: 0.9rem;
-            color: var(--text-gray);
-            font-style: italic;
-        }
-        
-        .progress-bar-simple {
-            width: 100%;
-            height: 8px;
-            background: var(--border-gray);
-            border-radius: 4px;
-            overflow: hidden;
-            margin-top: 0.75rem;
-        }
-        
-        .progress-fill-simple {
-            height: 100%;
-            border-radius: 4px;
-            transition: width 0.5s ease;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary-blue), #004AAE);
-            color: white;
-            border: none;
-            padding: 1rem 2rem;
-            font-size: 1.1rem;
-            font-weight: 600;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            box-shadow: 0 4px 15px rgba(0, 102, 220, 0.3);
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 102, 220, 0.4);
-            background: linear-gradient(135deg, #004AAE, var(--primary-blue));
-        }
-        
-        .btn-secondary {
-            background: var(--card-bg);
-            color: var(--text-light);
-            border: 2px solid var(--primary-orange);
-            padding: 1rem 2rem;
-            font-size: 1rem;
-            font-weight: 600;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .btn-secondary:hover {
-            border-color: var(--primary-orange);
-            background: var(--primary-orange);
-            box-shadow: 0 4px 15px rgba(231, 65, 0, 0.3);
-            transform: translateY(-2px);
-        }
-        
-        .action-buttons {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            margin-top: 3rem;
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 3rem;
-        }
-        
-        .spinner {
-            border: 4px solid var(--border-gray);
-            border-top: 4px solid var(--primary-blue);
-            border-right: 4px solid var(--primary-orange);
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 1rem;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+            --primary-blue: #0066DC; --primary-orange: #E74100;
+            --env-green: #B2BF30; --dark-bg: #2D2D2D; --card-bg: #333333;
+            --text-light: #FFFFFF; --text-gray: #999999; --border-gray: #444444;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%); color: var(--text-light); min-height: 100vh; }
+        .header { background: linear-gradient(135deg, var(--primary-blue), #004AAE); padding: 1.5rem 0; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 20px rgba(0,0,0,0.3); border-bottom: 2px solid var(--primary-orange); }
+        .header-content { max-width: 1200px; margin: 0 auto; padding: 0 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .logo { display: flex; align-items: center; gap: 0.75rem; font-size: 1.5rem; font-weight: 700; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+        .screen { display: none; animation: fadeIn 0.5s ease; }
+        .screen.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* UI Components */
+        .btn-primary { background: linear-gradient(135deg, var(--primary-blue), #004AAE); color: white; border: none; padding: 1rem 2rem; font-weight: 600; border-radius: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; transition: transform 0.2s; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,102,220,0.4); }
+        .empresa-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
+        .empresa-card { background: var(--card-bg); border: 2px solid var(--border-gray); border-radius: 12px; padding: 2rem; cursor: pointer; text-align: center; transition: all 0.3s; }
+        .empresa-card:hover { border-color: var(--primary-blue); transform: translateY(-5px); }
+        .empresa-icon { font-size: 3rem; color: var(--primary-blue); margin-bottom: 1rem; }
+        
+        .question-container { max-width: 800px; margin: 2rem auto; background: var(--card-bg); padding: 3rem; border-radius: 16px; border: 1px solid var(--border-gray); }
+        .question-text { font-size: 1.5rem; font-weight: 600; margin-bottom: 2rem; }
+        .answer-buttons { display: flex; gap: 1rem; justify-content: center; }
+        .btn-answer { flex: 1; padding: 1.5rem; border-radius: 12px; font-weight: 600; cursor: pointer; background: #1A1A1A; color: white; border: 2px solid var(--border-gray); transition: all 0.3s; }
+        .btn-answer.si:hover { border-color: var(--env-green); background: rgba(178, 191, 48, 0.1); }
+        .btn-answer.no:hover { border-color: var(--primary-orange); background: rgba(231, 65, 0, 0.1); }
+
+        .results-header { text-align: center; margin-bottom: 2rem; }
+        .nivel-badge { font-size: 1.5rem; padding: 1rem 2rem; border-radius: 12px; display: inline-block; margin: 1rem 0; }
+        .nivel-excelente { background: var(--env-green); color: #1a1a1a; }
+        .nivel-bueno { background: var(--primary-blue); }
+        .nivel-regular { background: var(--primary-orange); }
+        .nivel-inicial { background: #666; }
+        
+        .action-buttons { display: flex; gap: 1rem; justify-content: center; margin-top: 3rem; flex-wrap: wrap; }
     </style>
 </head>
 <body>
+
+    <!-- HEADER -->
     <div class="header">
         <div class="header-content">
             <div class="logo">
-                <!-- // Comentario: Contenedor del logo del header. Se llenará dinámicamente. -->
-                <div id="logoHeaderContainer" style="display: inline-flex; align-items: center;">
-                    <!-- // Comentario: Este es el logo SVG original que se usará si no hay URL en el Sheet -->
-                    <svg width="32" height="32" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
-                        <rect width="80" height="80" fill="#ffffff" rx="10"/>
-                        <path d="M20 30L40 50L60 20" stroke="#E74100" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
+                <div id="logoHeaderContainer">
+                    <i class="fas fa-leaf" style="color: var(--env-green);"></i>
                 </div>
-                <span>COMPROMISO PRO</span>
-                <span style="color: var(--env-green); margin-left: 0.5rem;">| Medio Ambiente</span>
+                <span style="margin-left: 10px;">COMPROMISO PRO</span>
             </div>
-            <div class="progress-info" id="progressInfo">
-                Pregunta <span id="currentQ">0</span> de <span id="totalQ">0</span>
+            <div style="font-size: 0.9rem; color: rgba(255,255,255,0.7);">
+                Pregunta <span id="currentQ">0</span> / <span id="totalQ">0</span>
             </div>
         </div>
     </div>
 
     <div class="container">
-        <!-- Welcome Screen -->
+        
+        <!-- PANTALLA 1: BIENVENIDA -->
         <div id="welcomeScreen" class="screen active">
-            <div class="welcome-screen">
-                <!-- // Comentario: Contenedor del logo de bienvenida. Se llenará dinámicamente. -->
-                <div id="logoWelcomeContainer" style="display: flex; justify-content: center; align-items: center; gap: 1rem; margin-bottom: 1rem;">
-                     <!-- // Comentario: Este es el logo Base64 original que se usará si no hay URL en el Sheet -->
-                    <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iODAiIHZpZXdCb3g9IjAgMCA4MCA4MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iZ3JhZDEiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdHlsZT0ic3RvcC1jb2xvcjojMDA2NkRDO3N0b3Atb3BhY2l0eToxIiAvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiMwMDRBQUU7c3RvcC1vcGFjaXR5OjEiIC8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8cmVjdCB3aWR0aD0iODAiIGhlaWdodD0iODAiIGZpbGw9InVybCgjZ3JhZDEpIiByeD0iMTUiLz4KICA8cGF0aCBkPSJNMjAgMzBMNDAgNTBMNjAgMjAiIHN0cm9rZT0iI0U3NDEwMCIgc3Ryb2tlLXdpZHRoPSI2IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPC9zdmc+" alt="Compromiso Pro" style="width: 60px; height: 60px;">
+            <div style="text-align: center; padding: 3rem 0;">
+                <!-- Logo dinámico bienvenida -->
+                <div id="logoWelcomeContainer" style="margin-bottom: 1rem;">
+                    <i class="fas fa-leaf" style="font-size: 4rem; color: var(--env-green);"></i>
                 </div>
-                <h1 class="welcome-title">Scanner de Medio Ambiente</h1>
-                <p style="color: var(--primary-blue); font-weight: 600; margin-bottom: 1rem;">COMPROMISO PRO</p>
-                <p class="welcome-subtitle">
-                    Identifica en cuál de las 5 áreas ambientales debes enfocarte primero.
-                    Recibe recomendaciones personalizadas y un plan de acción claro.
+                <h1 style="font-size: 3rem; margin-bottom: 1rem;">SCANNER AMBIENTAL</h1>
+                <p style="color: var(--text-gray); font-size: 1.2rem; max-width: 600px; margin: 0 auto;">
+                    Diagnóstico rápido para empresas de construcción. Identifica brechas y recibe un plan de acción inmediato.
                 </p>
-                
-                <div class="info-boxes">
-                    <div class="info-box">
-                        <div class="info-box-title">
-                            <i class="fas fa-clipboard-check"></i>
-                            ¿Qué evaluaremos?
-                        </div>
-                        <div class="info-box-content">
-                            <ul>
-                                <li>Gestión de residuos</li>
-                                <li>Eficiencia hídrica</li>
-                                <li>Certificaciones ambientales</li>
-                                <li>Huella de carbono</li>
-                                <li>Eficiencia energética</li>
-                            </ul>
-                        </div>
-                    </div>
-                    
-                    <div class="info-box">
-                        <div class="info-box-title">
-                            <i class="fas fa-clock"></i>
-                            Tiempo y resultados
-                        </div>
-                        <div class="info-box-content">
-                            <strong>⏱️ Duración:</strong> 5 minutos<br>
-                            <strong>📊 Recibirás:</strong><br>
-                            • Tu nivel actual por área<br>
-                            • Priorización de acciones<br>
-                            • Reporte PDF descargable<br>
-                            • Herramientas recomendadas
-                        </div>
-                    </div>
-                    
-                    <div class="info-box">
-                        <div class="info-box-title" style="color: var(--env-green);">
-                            <i class="fas fa-route"></i>
-                            Plan de acción
-                        </div>
-                        <div class="info-box-content">
-                            Al finalizar sabrás:<br>
-                            • ¿Por dónde empezar?<br>
-                            • ¿Qué áreas priorizar?<br>
-                            • ¿Qué herramientas usar?<br>
-                            • ¿Cuáles áreas mantener?
-                        </div>
-                    </div>
-                </div>
-                
-                <h2 style="margin: 3rem 0 1.5rem; color: var(--text-gray);">Selecciona tu tipo de empresa</h2>
-                
-                <div class="empresa-grid" id="empresaGrid">
-                    <!-- Las empresas se cargarán dinámicamente desde Google Sheets -->
-                </div>
-                
-                <!-- Formulario de datos (oculto inicialmente) -->
-                <div id="userDataForm" style="display: none; max-width: 500px; margin: 2rem auto;">
-                    <div style="background: var(--card-bg); border-radius: 12px; padding: 2rem; border: 1px solid var(--border-gray);">
-                        <h3 style="margin-bottom: 1.5rem; text-align: center;">Antes de empezar...</h3>
-                        
-                        <div style="margin-bottom: 1rem;">
-                            <label style="display: block; margin-bottom: 0.5rem; color: var(--text-gray);">Nombre (opcional)</label>
-                            <input type="text" id="userName" placeholder="Ej: Juan Pérez" 
-                                   style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-gray); 
-                                          background: var(--darker-bg); color: var(--text-light); font-size: 1rem;">
-                        </div>
-                        
-                        <div style="margin-bottom: 1.5rem;">
-                            <label style="display: block; margin-bottom: 0.5rem; color: var(--text-gray);">Email (opcional)</label>
-                            <input type="email" id="userEmail" placeholder="Ej: juan@empresa.cl"
-                                   style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-gray); 
-                                          background: var(--darker-bg); color: var(--text-light); font-size: 1rem;">
-                        </div>
-                        
-                        <button class="btn-primary" onclick="startSurvey()" style="width: 100%; justify-content: center;">
-                            <i class="fas fa-play"></i>
-                            Comenzar Evaluación
-                        </button>
-                        
-                        <p style="text-align: center; margin-top: 1rem; font-size: 0.875rem; color: var(--text-gray);">
-                            <i class="fas fa-lock"></i> Tus datos son privados y no serán compartidos
-                        </p>
-                    </div>
-                </div>
+            </div>
+            
+            <h2 style="text-align: center; margin-top: 2rem;">Selecciona tu rubro:</h2>
+            <div class="empresa-grid" id="empresaGrid">
+                <!-- Se llena con JS -->
+            </div>
+
+            <!-- Formulario Datos Usuario -->
+            <div id="userDataForm" style="display: none; max-width: 400px; margin: 2rem auto; background: var(--card-bg); padding: 2rem; border-radius: 12px;">
+                <h3 style="margin-bottom: 1rem;">Datos de Contacto</h3>
+                <input type="text" id="userName" placeholder="Tu Nombre" style="width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 6px; border:none;">
+                <input type="email" id="userEmail" placeholder="Tu Email" style="width: 100%; padding: 10px; margin-bottom: 20px; border-radius: 6px; border:none;">
+                <button class="btn-primary" onclick="startSurvey()" style="width: 100%; justify-content: center;">Comenzar</button>
             </div>
         </div>
 
-        <!-- Loading Screen -->
-        <div id="loadingScreen" class="screen">
-            <div class="loading">
-                <div class="spinner"></div>
-                <h2>Cargando cuestionario...</h2>
-                <p style="color: var(--text-gray); margin-top: 1rem;">Preparando preguntas personalizadas</p>
-            </div>
-        </div>
-
-        <!-- Question Screen -->
+        <!-- PANTALLA 2: PREGUNTAS -->
         <div id="questionScreen" class="screen">
             <div class="question-container">
-                <div class="ruta-badge" id="rutaBadge"></div>
-                <div class="question-text" id="questionText"></div>
+                <span id="rutaBadge" style="color: var(--primary-blue); font-weight: 700; text-transform: uppercase;">CATEGORÍA</span>
+                <div class="question-text" id="questionText">...</div>
                 <div class="answer-buttons">
-                    <button class="btn-answer si" onclick="answerQuestion(true)">
-                        <i class="fas fa-check"></i> <span>SÍ</span>
-                    </button>
-                    <button class="btn-answer no" onclick="answerQuestion(false)">
-                        <i class="fas fa-times"></i> <span>NO</span>
-                    </button>
+                    <button class="btn-answer si" onclick="answerQuestion(true)"><i class="fas fa-check"></i> SÍ</button>
+                    <button class="btn-answer no" onclick="answerQuestion(false)"><i class="fas fa-times"></i> NO</button>
                 </div>
             </div>
         </div>
 
-        <!-- Results Screen -->
+        <!-- PANTALLA 3: RESULTADOS -->
         <div id="resultsScreen" class="screen">
             <div class="results-header">
-                <h1 class="results-title">📊 Tus Resultados en Medio Ambiente</h1>
-                <div id="nivelBadge" class="nivel-badge"></div>
+                <h1>Resultados del Diagnóstico</h1>
+                <div id="nivelBadge" class="nivel-badge">Calculando...</div>
+                <div style="font-size: 3rem; font-weight: 700; margin: 1rem 0;" id="scoreDisplay">0%</div>
+                <div id="orientationMessage" style="max-width: 700px; margin: 0 auto; color: var(--text-gray); line-height: 1.6;"></div>
             </div>
-
-            <div class="orientation-message" id="orientationMessage"></div>
-
-            <div class="gauge-container">
-                <canvas id="gaugeChart"></canvas>
-            </div>
-
-            <div id="prioritySections"></div>
 
             <div class="action-buttons">
-                <button class="btn-primary" onclick="downloadPDF()">
-                    <i class="fas fa-download"></i>
-                    Descargar Reporte PDF
+                <button class="btn-primary" onclick="restartScanner()" style="background: #444;">
+                    <i class="fas fa-redo"></i> Nueva Evaluación
                 </button>
-                <button class="btn-secondary" onclick="restartScanner()">
-                    <i class="fas fa-redo"></i>
-                    Nueva Evaluación
+                
+                <!-- BOTÓN PDF PRO (Nuevo) -->
+                <button class="btn-primary" onclick="generarPDFPro()" style="background: linear-gradient(135deg, #28a745, #218838);">
+                    <i class="fas fa-file-pdf"></i> Descargar Reporte PRO
                 </button>
             </div>
         </div>
+
+        <!-- LOADING -->
+        <div id="loadingScreen" class="screen" style="text-align: center; padding-top: 5rem;">
+            <i class="fas fa-circle-notch fa-spin" style="font-size: 3rem; color: var(--primary-blue);"></i>
+            <p style="margin-top: 1rem;">Procesando...</p>
+        </div>
+
     </div>
 
     <script>
-        // URL del Google Apps Script conectado a tu Google Sheet
+        // ⚠️ REEMPLAZA CON TU URL DE APPS SCRIPT (Web App URL)
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwvENq9VafApZYSosxk1_ACoIKlwy5_QDcY82Ek_Zv1REZO6OszjA0A6pYd44BqexDT/exec';
         
-        let appData = {
-            preguntas: [],
-            herramientas: [],
-            categorias: [],
-            empresas: [],
-            configuracion: {} // // Comentario: Añadido objeto para configuración
-        };
-        
-        let currentState = {
-            empresaSeleccionada: null,
-            preguntaActual: 0,
-            respuestas: [],
-            preguntasSaltadas: new Set(), // Set para evitar duplicados
-            resultados: null
-        };
+        let appData = {};
+        let currentState = { respuestas: [], preguntasFiltradas: [], preguntaActual: 0 };
 
-        let gaugeChart = null;
+        // 1. INICIALIZACIÓN Y LOGOS
+        window.addEventListener('DOMContentLoaded', loadData);
 
-        // Cargar datos desde Google Sheets
-        async function loadDataFromSheets() {
-            console.log('🔄 Intentando cargar datos desde Google Sheets...');
-            console.log('📍 URL del Apps Script:', APPS_SCRIPT_URL);
-            
+        async function loadData() {
             try {
-                const response = await fetch(APPS_SCRIPT_URL);
-                console.log('✅ Respuesta recibida del servidor');
-                console.log('📊 Status:', response.status);
-                
-                const data = await response.json();
-                console.log('✅ Datos parseados correctamente');
-                console.log('📦 Datos recibidos:', data);
-                
-                if (data.status === 'error') {
-                    console.error('❌ Error en el Apps Script:', data.message);
-                    alert('Error al cargar el cuestionario: ' + data.message);
-                    return;
-                }
-                
+                const res = await fetch(APPS_SCRIPT_URL);
+                const data = await res.json();
                 appData = data;
-                console.log('✅ Datos cargados exitosamente:');
-                console.log('  📝 Preguntas:', appData.preguntas.length);
-                console.log('  🔧 Herramientas:', appData.herramientas.length);
-                console.log('  📂 Categorías:', appData.categorias.length);
-                console.log('  🏢 Empresas:', appData.empresas.length);
-                console.log('  ⚙️ Configuración:', Object.keys(appData.configuracion || {}).length + ' parámetros'); // // Comentario: Log de config
                 
-                // // Comentario: Aplicar configuración (como logos)
-                aplicarConfiguracion(appData.configuracion);
+                // Aplicar Logo si viene en configuración
+                if (appData.configuracion && appData.configuracion.URL_Logo) {
+                    const url = appData.configuracion.URL_Logo;
+                    document.getElementById('logoHeaderContainer').innerHTML = `<img src="${url}" style="height: 32px; border-radius: 4px;">`;
+                    document.getElementById('logoWelcomeContainer').innerHTML = `<img src="${url}" style="height: 80px; border-radius: 8px;">`;
+                }
 
-                // Renderizar empresas dinámicamente
                 renderEmpresas();
-                
-            } catch (error) {
-                console.error('❌ ERROR al cargar datos:', error);
-                console.error('📍 URL que falló:', APPS_SCRIPT_URL);
-                console.error('💡 Posibles causas:');
-                console.error('  1. El Apps Script no está desplegado como Web App');
-                console.error('  2. La URL del Apps Script es incorrecta');
-                console.error('  3. El Apps Script tiene errores');
-                console.error('  4. Problemas de CORS (poco probable)');
-                alert('Error al cargar el cuestionario. Revisa la consola (F12) para más detalles.');
+                console.log("Datos cargados OK");
+            } catch (e) {
+                console.error(e);
+                alert("Error cargando datos. Revisa la conexión.");
             }
         }
 
-        // // Comentario: Nueva función para aplicar la configuración (logos)
-        function aplicarConfiguracion(config) {
-            if (!config) {
-                console.log('No se encontró objeto de configuración.');
-                return;
-            }
-
-            const logoUrl = config.URL_Logo;
-            
-            if (logoUrl && logoUrl.trim() !== '') {
-                console.log('⚙️ Aplicando URL_Logo:', logoUrl);
-                
-                // Aplicar a Header
-                const logoHeaderContainer = document.getElementById('logoHeaderContainer');
-                if (logoHeaderContainer) {
-                    logoHeaderContainer.innerHTML = `<img src="${logoUrl}" alt="Logo" style="height: 32px; width: auto; border-radius: 4px;">`;
-                }
-                
-                // Aplicar a Welcome
-                const logoWelcomeContainer = document.getElementById('logoWelcomeContainer');
-                if (logoWelcomeContainer) {
-                    logoWelcomeContainer.innerHTML = `<img src="${logoUrl}" alt="Logo" style="width: 60px; height: 60px; border-radius: 8px;">`;
-                }
-
-            } else {
-                console.log('⚙️ No se encontró URL_Logo, usando logos por defecto.');
-            }
-        }
-        
-        // Renderizar empresas dinámicamente
+        // 2. RENDERIZADO
         function renderEmpresas() {
-            const empresaGrid = document.getElementById('empresaGrid');
-            empresaGrid.innerHTML = ''; // Limpiar
-            
-            if (!appData.empresas || appData.empresas.length === 0) {
-                empresaGrid.innerHTML = `
-                    <div style="grid-column: 1/-1; text-align: center; padding: 2rem;">
-                        <p style="color: var(--warning-orange); font-size: 1.1rem;">
-                            ⚠️ No se encontraron tipos de empresa en el Google Sheet.
-                        </p>
-                        <p style="color: var(--text-gray); margin-top: 0.5rem;">
-                            Verifica que exista la hoja "Empresas" con datos activos.
-                        </p>
-                    </div>
-                `;
-                return;
-            }
-            
-            appData.empresas.forEach(empresa => {
-                const card = document.createElement('div');
-                card.className = 'empresa-card';
-                card.onclick = () => selectEmpresa(empresa.tipo);
+            const grid = document.getElementById('empresaGrid');
+            grid.innerHTML = '';
+            appData.empresas.forEach(emp => {
+                const div = document.createElement('div');
+                div.className = 'empresa-card';
+                // Manejo de iconos FontAwesome
+                let icon = emp.icono || 'fa-building';
+                if (!icon.includes('fa-')) icon = 'fa-' + icon;
                 
-                // Determinar ícono (puede venir con o sin 'fas fa-')
-                let iconClass = empresa.icono;
-                if (!iconClass.includes('fa-')) {
-                    iconClass = 'fas fa-' + iconClass;
-                } else if (!iconClass.includes('fas ')) {
-                    iconClass = 'fas ' + iconClass;
-                }
-                
-                card.innerHTML = `
-                    <div class="empresa-icon"><i class="${iconClass}"></i></div>
-                    <div class="empresa-name">${empresa.tipo}</div>
-                    <div class="empresa-desc">${empresa.descripcion || 'Servicios especializados'}</div>
-                `;
-                
-                empresaGrid.appendChild(card);
+                div.innerHTML = `<div class="empresa-icon"><i class="fas ${icon}"></i></div><h3>${emp.tipo}</h3><p>${emp.desc||''}</p>`;
+                div.onclick = () => {
+                    currentState.empresaSeleccionada = emp.tipo;
+                    document.getElementById('empresaGrid').style.display = 'none';
+                    document.querySelector('h2').style.display = 'none';
+                    document.getElementById('userDataForm').style.display = 'block';
+                };
+                grid.appendChild(div);
             });
-            
-            console.log('✅ Empresas renderizadas:', appData.empresas.length);
         }
 
-        function selectEmpresa(tipo) {
-            currentState.empresaSeleccionada = tipo;
-            
-            // Ocultar grid de empresas y mostrar formulario
-            document.getElementById('empresaGrid').style.display = 'none';
-            document.querySelector('h2').style.display = 'none'; // Ocultar título
-            document.getElementById('userDataForm').style.display = 'block';
-        }
-        
+        // 3. LÓGICA DE ENCUESTA
         function startSurvey() {
-            // Capturar datos del usuario (opcional)
-            currentState.userName = document.getElementById('userName').value.trim() || 'Anónimo';
-            currentState.userEmail = document.getElementById('userEmail').value.trim() || '';
+            currentState.userName = document.getElementById('userName').value;
+            currentState.userEmail = document.getElementById('userEmail').value;
             
-            showScreen('loadingScreen');
-            
-            // Filtrar preguntas según tipo de empresa
-            const preguntasFiltradas = appData.preguntas.filter(p => {
+            // FILTRO INTELIGENTE (Incluye "Especialidades" y "Todas")
+            currentState.preguntasFiltradas = appData.preguntas.filter(p => {
                 const tipos = p.tipo_empresa.split(',').map(t => t.trim());
                 return tipos.includes(currentState.empresaSeleccionada) || tipos.includes('Todas');
-            });
-            
-            // Ordenar por categoría y orden
-            preguntasFiltradas.sort((a, b) => {
-                if (a.categoria !== b.categoria) {
-                    return a.categoria.localeCompare(b.categoria);
-                }
-                return a.orden - b.orden;
-            });
-            
-            currentState.preguntasFiltradas = preguntasFiltradas;
+            }).sort((a,b) => a.orden - b.orden);
+
             currentState.preguntaActual = 0;
-            currentState.preguntasSaltadas = new Set();
+            currentState.respuestas = [];
+            currentState.saltadas = new Set();
             
-            console.log(`📋 Total de preguntas filtradas: ${preguntasFiltradas.length}`);
-            
-            setTimeout(() => {
-                showScreen('questionScreen');
-                document.getElementById('progressInfo').style.display = 'block';
-                showQuestion();
-            }, 1000);
+            showScreen('questionScreen');
+            renderQuestion();
         }
 
-        function showScreen(screenId) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(screenId).classList.add('active');
-        }
-
-        function showQuestion() {
-            // Buscar la siguiente pregunta no saltada
-            while (currentState.preguntaActual < currentState.preguntasFiltradas.length) {
-                const pregunta = currentState.preguntasFiltradas[currentState.preguntaActual];
-                
-                // Verificar si esta pregunta ya fue saltada
-                if (currentState.preguntasSaltadas.has(pregunta.id)) {
-                    console.log(`⏩ Saltando pregunta ${pregunta.id} (ya procesada como dependiente)`);
-                    currentState.preguntaActual++;
-                    continue;
-                }
-                
-                // Mostrar la pregunta
-                document.getElementById('rutaBadge').textContent = pregunta.categoria;
-                document.getElementById('questionText').textContent = pregunta.pregunta;
-                
-                // Actualizar contador (descontando las saltadas)
-                const preguntasRestantes = currentState.preguntasFiltradas.length - currentState.preguntasSaltadas.size;
-                const preguntaNumero = currentState.preguntaActual + 1 - currentState.preguntasSaltadas.size;
-                
-                document.getElementById('currentQ').textContent = preguntaNumero;
-                document.getElementById('totalQ').textContent = preguntasRestantes;
-                
-                return; // Salir cuando encontramos una pregunta válida
+        function renderQuestion() {
+            const p = currentState.preguntasFiltradas[currentState.preguntaActual];
+            
+            // Salto de preguntas ya procesadas (dependencias)
+            if (currentState.saltadas.has(p.id)) {
+                currentState.preguntaActual++;
+                if (currentState.preguntaActual >= currentState.preguntasFiltradas.length) return finishSurvey();
+                return renderQuestion();
             }
-            
-            // Si llegamos aquí, no hay más preguntas
-            calculateResults();
+
+            document.getElementById('rutaBadge').innerText = p.categoria;
+            document.getElementById('questionText').innerText = p.pregunta;
+            document.getElementById('currentQ').innerText = currentState.preguntaActual + 1;
+            document.getElementById('totalQ').innerText = currentState.preguntasFiltradas.length;
         }
 
-        function answerQuestion(respuesta) {
-            const pregunta = currentState.preguntasFiltradas[currentState.preguntaActual];
+        function answerQuestion(val) {
+            const p = currentState.preguntasFiltradas[currentState.preguntaActual];
             
-            // Guardar respuesta actual
             currentState.respuestas.push({
-                id: pregunta.id,
-                pregunta: pregunta.pregunta,
-                categoria: pregunta.categoria,
-                contexto_categoria: pregunta.contexto_categoria,
-                recomendacion: pregunta.recomendacion_si_no,
-                respuesta: respuesta,
-                peso: pregunta.peso_puntos
+                id: p.id,
+                categoria: p.categoria,
+                pregunta: p.pregunta,
+                recomendacion: p.recomendacion_si_no,
+                peso: p.peso,
+                respuesta: val
             });
-            
-            console.log(`📝 Respuesta guardada: ${pregunta.id} = ${respuesta ? 'SÍ' : 'NO'}`);
-            
-            // LÓGICA MEJORADA DE PREGUNTA MADRE
-            if (!respuesta) { // Si responde NO
-                // Buscar preguntas que dependen de esta pregunta madre
-                const preguntasDependientes = currentState.preguntasFiltradas.filter(p => 
-                    p.pregunta_madre && 
-                    p.pregunta_madre.trim() === pregunta.id && 
-                    !currentState.preguntasSaltadas.has(p.id)
-                );
-                
-                if (preguntasDependientes.length > 0) {
-                    console.log(`🔗 Pregunta madre ${pregunta.id} respondida NO`);
-                    console.log(`  Saltando ${preguntasDependientes.length} preguntas dependientes:`);
-                    
-                    preguntasDependientes.forEach(dep => {
-                        // Marcar como saltada
-                        currentState.preguntasSaltadas.add(dep.id);
-                        
-                        // Auto-responder NO
-                        currentState.respuestas.push({
-                            id: dep.id,
-                            pregunta: dep.pregunta,
-                            categoria: dep.categoria,
-                            contexto_categoria: dep.contexto_categoria,
-                            recomendacion: dep.recomendacion_si_no,
-                            respuesta: false,
-                            peso: dep.peso_puntos,
-                            auto_skipped: true
-                        });
-                        
-                        console.log(`  → ${dep.id}: auto-respondida NO`);
-                    });
-                }
-                
-                // También verificar patrón -001 (por compatibilidad legacy)
-                if (pregunta.id.endsWith('-001')) {
-                    const baseId = pregunta.id.substring(0, pregunta.id.length - 4);
-                    const preguntasHijas = currentState.preguntasFiltradas.filter(p => 
-                        p.id.startsWith(baseId) && 
-                        p.id !== pregunta.id && 
-                        !currentState.preguntasSaltadas.has(p.id)
-                    );
-                    
-                    if (preguntasHijas.length > 0) {
-                        console.log(`📦 Patrón -001 detectado, saltando ${preguntasHijas.length} preguntas del grupo`);
-                        
-                        preguntasHijas.forEach(hija => {
-                            if (!currentState.preguntasSaltadas.has(hija.id)) {
-                                currentState.preguntasSaltadas.add(hija.id);
-                                
-                                // Solo agregar respuesta si no existe ya
-                                if (!currentState.respuestas.find(r => r.id === hija.id)) {
-                                    currentState.respuestas.push({
-                                        id: hija.id,
-                                        pregunta: hija.pregunta,
-                                        categoria: hija.categoria,
-                                        contexto_categoria: hija.contexto_categoria,
-                                        recomendacion: hija.recomendacion_si_no,
-                                        respuesta: false,
-                                        peso: hija.peso_puntos,
-                                        auto_skipped: true
-                                    });
-                                    console.log(`  → ${hija.id}: auto-respondida NO (patrón -001)`);
-                                }
-                            }
-                        });
-                    }
-                }
+
+            // Lógica "Madre-Hija": Si responde NO a la madre, salta las hijas
+            if (!val && p.id) {
+                 const hijas = currentState.preguntasFiltradas.filter(h => h.madre === p.id);
+                 hijas.forEach(h => {
+                     currentState.saltadas.add(h.id);
+                     currentState.respuestas.push({id: h.id, categoria:h.categoria, respuesta: false, peso: h.peso, skipped: true});
+                 });
             }
-            
-            // Avanzar a la siguiente pregunta
+
             currentState.preguntaActual++;
-            
             if (currentState.preguntaActual >= currentState.preguntasFiltradas.length) {
-                calculateResults();
+                finishSurvey();
             } else {
-                showQuestion();
+                renderQuestion();
             }
         }
 
-        function calculateResults() {
-            console.log('📊 Calculando resultados finales...');
+        // 4. RESULTADOS Y GUARDADO
+        function finishSurvey() {
+            showScreen('loadingScreen');
             
-            const categorias = {};
-            let totalPuntos = 0;
-            let puntosObtenidos = 0;
-            
-            // Agrupar por categoría
+            let total = 0, obtained = 0;
             currentState.respuestas.forEach(r => {
-                if (!categorias[r.categoria]) {
-                    categorias[r.categoria] = {
-                        nombre: r.categoria,
-                        contexto: r.contexto_categoria,
-                        total: 0,
-                        obtenidos: 0,
-                        preguntas: []
-                    };
-                }
-                
-                categorias[r.categoria].total += r.peso;
-                totalPuntos += r.peso;
-                
-                if (r.respuesta) {
-                    categorias[r.categoria].obtenidos += r.peso;
-                    puntosObtenidos += r.peso;
-                }
-                
-                categorias[r.categoria].preguntas.push(r);
+                if (!r.skipped) total += (r.peso || 0);
+                if (r.respuesta) obtained += (r.peso || 0);
             });
+
+            const score = total === 0 ? 0 : Math.round((obtained/total)*100);
             
-            // Calcular porcentajes
-            const resultadosPorRuta = Object.values(categorias).map(cat => ({
-                nombre: cat.nombre,
-                contexto: cat.contexto,
-                total: cat.total,
-                obtenidos: cat.obtenidos,
-                porcentaje: Math.round((cat.obtenidos / cat.total) * 100),
-                preguntas: cat.preguntas
-            }));
-            
-            const porcentajeGeneral = Math.round((puntosObtenidos / totalPuntos) * 100);
-            
-            // Determinar nivel
-            let nivel, nivelClase, nivelDescripcion;
-            if (porcentajeGeneral >= 80) {
-                nivel = "🌳 EXCELENTE - Liderazgo ambiental";
-                nivelClase = "nivel-excelente";
-                nivelDescripcion = "Tu empresa muestra un alto nivel de madurez ambiental. Estás entre las empresas líderes del sector.";
-            } else if (porcentajeGeneral >= 60) {
-                nivel = "🌿 BUENO - En desarrollo sostenible";
-                nivelClase = "nivel-bueno";
-                nivelDescripcion = "Tu empresa tiene bases sólidas. Con mejoras enfocadas, puedes alcanzar el nivel de excelencia.";
-            } else if (porcentajeGeneral >= 40) {
-                nivel = "🌾 REGULAR - Oportunidades de mejora";
-                nivelClase = "nivel-regular";
-                nivelDescripcion = "Tu empresa ha dado los primeros pasos, pero hay áreas importantes por desarrollar para cumplir estándares actuales.";
-            } else {
-                nivel = "🌱 INICIAL - Punto de partida";
-                nivelClase = "nivel-inicial";
-                nivelDescripcion = "Estás comenzando tu camino hacia la sostenibilidad. Las herramientas sugeridas te ayudarán a construir bases sólidas.";
-            }
-            
-            // Clasificar por prioridad
-            const urgentes = resultadosPorRuta.filter(r => r.porcentaje < 40);
-            const mejorables = resultadosPorRuta.filter(r => r.porcentaje >= 40 && r.porcentaje < 70);
-            const mantener = resultadosPorRuta.filter(r => r.porcentaje >= 70);
-            
-            currentState.resultados = {
-                porcentajeGeneral,
-                nivel,
-                nivelClase,
-                nivelDescripcion,
-                totalPuntos,
-                puntosObtenidos,
-                resultadosPorRuta,
-                urgentes,
-                mejorables,
-                mantener
-            };
-            
-            console.log('✅ Resultados calculados:', {
-                porcentajeGeneral: porcentajeGeneral + '%',
+            // Lógica de Niveles (configurable desde Excel si se quisiera, aquí hardcoded por seguridad)
+            let nivel = "INICIAL", clase = "nivel-inicial", msg = "Estás comenzando.";
+            if(score >= 40) { nivel = "REGULAR"; clase = "nivel-regular"; msg = "Tienes avances, pero falta estructura."; }
+            if(score >= 60) { nivel = "BUENO"; clase = "nivel-bueno"; msg = "Buen camino, enfócate en certificar."; }
+            if(score >= 80) { nivel = "EXCELENTE"; clase = "nivel-excelente"; msg = "Líder en sostenibilidad."; }
+
+            currentState.resultados = { score, nivel, msg };
+
+            document.getElementById('nivelBadge').innerText = nivel;
+            document.getElementById('nivelBadge').className = `nivel-badge ${clase}`;
+            document.getElementById('scoreDisplay').innerText = score + '%';
+            document.getElementById('orientationMessage').innerText = msg;
+
+            // Guardado asíncrono
+            saveData(score, nivel);
+
+            setTimeout(() => showScreen('resultsScreen'), 1000);
+        }
+
+        function saveData(score, nivel) {
+            const payload = {
+                action: 'save',
+                tipo_empresa: currentState.empresaSeleccionada,
+                email_usuario: currentState.userEmail,
+                nombre_usuario: currentState.userName,
+                porcentaje_general: score,
                 nivel: nivel,
-                respuestasTotal: currentState.respuestas.length,
-                autoSaltadas: currentState.respuestas.filter(r => r.auto_skipped).length
-            });
-            
-            // Enviar a Google Sheets
-            saveToSheets();
-            
-            showResults();
+                respuestas: currentState.respuestas
+            };
+            fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
         }
 
-        async function saveToSheets() {
-            try {
-                const dataToSave = {
-                    timestamp: new Date().toISOString(),
-                    tipo_empresa: currentState.empresaSeleccionada,
-                    nombre_usuario: currentState.userName || '',
-                    email_usuario: currentState.userEmail || '',
-                    porcentaje_general: currentState.resultados.porcentajeGeneral,
-                    nivel: currentState.resultados.nivel,
-                    respuestas: currentState.respuestas
+        // 5. GENERACIÓN DE PDF PRO
+        function generarPDFPro() {
+            const btn = event.currentTarget;
+            const original = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando...';
+            btn.disabled = true;
+
+            // Preparación de datos (Mapping avanzado)
+            const falladas = currentState.respuestas.filter(r => r.respuesta === false && !r.skipped);
+            
+            const recomendaciones = falladas.map(f => {
+                // Buscar herramientas vinculadas
+                const tools = appData.herramientas.filter(h => 
+                    h.id_vinculados && h.id_vinculados.includes(f.id)
+                ).map(h => ({
+                    nombre: h.nombre,
+                    uso: h.desc_uso || "",      // Columna E del Excel
+                    url: h.url || "",           // Columna G del Excel
+                    tipo: h.tipo,
+                    duracion: h.duracion,
+                    costo: h.costo,
+                    nivel: h.nivel
+                }));
+
+                return {
+                    categoria: f.categoria,
+                    pregunta: f.pregunta,
+                    consejo: f.recomendacion || "Revisar manuales.",
+                    herramientas: tools
                 };
-                
-                console.log('💾 Guardando respuestas en Google Sheets...');
-                
-                await fetch(APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(dataToSave)
+            });
+
+            const payload = {
+                action: 'generar_pdf', // Señal al Router
+                meta: {
+                    fecha: new Date().toLocaleDateString(),
+                    empresa: currentState.empresaSeleccionada,
+                    usuario: currentState.userName,
+                    nivel: currentState.resultados.nivel,
+                    puntaje: currentState.resultados.score.toString(),
+                    mensaje_orientacion: currentState.resultados.msg
+                },
+                lista_recomendaciones: recomendaciones
+            };
+
+            fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) })
+                .then(r => r.json())
+                .then(d => {
+                    if(d.status === 'success') downloadBase64(d.base64, d.nombreArchivo);
+                    else alert("Error: " + d.message);
+                    btn.innerHTML = original; btn.disabled = false;
+                })
+                .catch(e => {
+                    alert("Error de conexión");
+                    btn.innerHTML = original; btn.disabled = false;
                 });
-                
-                console.log('✅ Respuestas guardadas exitosamente');
-            } catch (error) {
-                console.error('❌ Error guardando en Sheets:', error);
-            }
         }
 
-        function showResults() {
-            showScreen('resultsScreen');
-            document.getElementById('progressInfo').style.display = 'none';
-
-            const results = currentState.resultados;
-
-            document.getElementById('nivelBadge').textContent = results.nivel;
-            document.getElementById('nivelBadge').className = `nivel-badge ${results.nivelClase}`;
-
-            let prioridadTexto = "";
-            if (results.urgentes.length > 0) {
-                prioridadTexto = `Te recomendamos comenzar por <strong>${results.urgentes[0].nombre}</strong>` + 
-                    (results.urgentes.length > 1 ? ` y <strong>${results.urgentes[1].nombre}</strong>` : "") + 
-                    `, donde tienes mayor oportunidad de mejora.`;
-            } else if (results.mejorables.length > 0) {
-                prioridadTexto = `Enfócate en mejorar <strong>${results.mejorables[0].nombre}</strong> para alcanzar el siguiente nivel.`;
-            } else {
-                prioridadTexto = `¡Excelente trabajo! Mantén tus estándares actuales y sigue innovando.`;
-            }
-
-            document.getElementById('orientationMessage').innerHTML = `
-                <h3><i class="fas fa-compass"></i> Tu plan recomendado</h3>
-                <p>${results.nivelDescripcion}</p>
-                <p style="margin-top: 0.75rem;">${prioridadTexto}</p>
-            `;
-
-            createGaugeChart(results.porcentajeGeneral);
-
-            const prioritySections = document.getElementById('prioritySections');
-            prioritySections.innerHTML = '';
-
-            if (results.urgentes.length > 0) {
-                prioritySections.appendChild(createPrioritySection('urgente', 'ÁREAS PRIORITARIAS - Empieza aquí', results.urgentes));
-            }
-
-            if (results.mejorables.length > 0) {
-                prioritySections.appendChild(createPrioritySection('mejorable', 'OPORTUNIDADES DE MEJORA', results.mejorables));
-            }
-
-            if (results.mantener.length > 0) {
-                prioritySections.appendChild(createPrioritySection('mantener', 'ÁREAS FUERTES - Mantén el nivel', results.mantener));
-            }
+        function downloadBase64(b64, name) {
+            const a = document.createElement('a');
+            a.href = `data:application/pdf;base64,${b64}`;
+            a.download = name;
+            a.click();
         }
 
-        function createPrioritySection(type, title, rutas) {
-            const section = document.createElement('div');
-            section.className = 'priority-section';
-
-            const iconMap = {
-                'urgente': '🔴',
-                'mejorable': '🟡',
-                'mantener': '🟢'
-            };
-
-            section.innerHTML = `
-                <h2 class="priority-title ${type}">
-                    ${iconMap[type]} ${title}
-                </h2>
-                <div class="priority-cards"></div>
-            `;
-
-            const cardsContainer = section.querySelector('.priority-cards');
-
-            rutas.forEach(ruta => {
-                const card = document.createElement('div');
-                card.className = `priority-card ${type}`;
-
-                let color = '#666666';
-                if (ruta.porcentaje >= 70) color = '#B2BF30'; // Verde medio ambiente
-                else if (ruta.porcentaje >= 40) color = '#E74100'; // Naranja corporativo
-
-                // Contar herramientas disponibles
-                const herramientasCount = getHerramientasForCategoria(ruta.preguntas);
-
-                card.innerHTML = `
-                    <div class="priority-card-header">
-                        <div class="priority-card-name">${ruta.nombre}</div>
-                        <div class="priority-card-percentage" style="color: ${color}">${ruta.porcentaje}%</div>
-                    </div>
-                    <div class="priority-card-why">
-                        💡 ${ruta.contexto}
-                    </div>
-                    <div style="color: var(--text-gray); font-size: 0.9rem; margin-bottom: 0.5rem;">
-                        ${ruta.obtenidos} de ${ruta.total} puntos obtenidos
-                    </div>
-                    <div class="progress-bar-simple">
-                        <div class="progress-fill-simple" style="width: ${ruta.porcentaje}%; background: ${color}"></div>
-                    </div>
-                    ${herramientasCount > 0 ? `
-                        <div style="margin-top: 1rem; color: var(--env-green); font-size: 0.9rem;">
-                            <i class="fas fa-tools"></i> ${herramientasCount} herramientas recomendadas
-                        </div>
-                    ` : ''}
-                `;
-
-                cardsContainer.appendChild(card);
-            });
-
-            return section;
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
         }
-
-        function getHerramientasForCategoria(preguntas) {
-            let count = 0;
-            preguntas.forEach(p => {
-                if (!p.respuesta) {
-                    const herr = appData.herramientas.filter(h => 
-                        h.id_preguntas_vinculadas.includes(p.id)
-                    );
-                    count += herr.length;
-                }
-            });
-            return count;
-        }
-
-        function createGaugeChart(percentage) {
-            const canvas = document.getElementById('gaugeChart');
-            const ctx = canvas.getContext('2d');
-
-            if (gaugeChart) {
-                gaugeChart.destroy();
-            }
-
-            let color;
-            if (percentage >= 80) color = '#B2BF30'; // Verde medio ambiente
-            else if (percentage >= 60) color = '#0066DC'; // Azul corporativo
-            else if (percentage >= 40) color = '#E74100'; // Naranja corporativo
-            else color = '#666666'; // Gris
-
-            gaugeChart = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    datasets: [{
-                        data: [percentage, 100 - percentage],
-                        backgroundColor: [color, '#2A2A2A'],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    cutout: '75%',
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: { enabled: false }
-                    }
-                },
-                plugins: [{
-                    id: 'centerText',
-                    afterDraw: (chart) => {
-                        const ctx = chart.ctx;
-                        const centerX = chart.width / 2;
-                        const centerY = chart.height / 2;
-                        
-                        ctx.save();
-                        ctx.font = 'bold 48px Inter';
-                        ctx.fillStyle = color;
-                        ctx.textAlign = 'center';
-                        ctx.textBaseline = 'middle';
-                        ctx.fillText(`${percentage}%`, centerX, centerY);
-                        ctx.restore();
-                    }
-                }]
-            });
-        }
-
-        async function downloadPDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF('p', 'mm', 'a4');
-            const results = currentState.resultados;
-            
-            const verde = [16, 185, 129];
-            const darkGray = [55, 65, 81];
-            
-            let y = 20;
-            
-            // Header
-            doc.setFillColor(...verde);
-            doc.rect(0, 0, 210, 35, 'F');
-            
-            doc.setTextColor(255, 255, 255);
-            doc.setFontSize(22);
-            doc.setFont('helvetica', 'bold');
-            doc.text('REPORTE DE EVALUACION AMBIENTAL', 105, 15, { align: 'center' });
-            
-            doc.setFontSize(12);
-            doc.setFont('helvetica', 'normal');
-            doc.text('Scanner Ambiental - Plan de Accion Personalizado', 105, 25, { align: 'center' });
-            
-            y = 45;
-            doc.setTextColor(...darkGray);
-            doc.setFontSize(11);
-            doc.text(`Empresa: ${currentState.empresaSeleccionada}`, 20, y);
-            doc.text(`Fecha: ${new Date().toLocaleDateString('es-CL')}`, 20, y + 6);
-            
-            // Resumen
-            y += 20;
-            doc.setFillColor(240, 240, 240);
-            doc.rect(15, y - 5, 180, 50, 'F');
-            
-            doc.setFontSize(16);
-            doc.setFont('helvetica', 'bold');
-            doc.setTextColor(...verde);
-            doc.text('RESUMEN EJECUTIVO', 20, y + 5);
-            
-            let nivelTexto = results.nivel.replace(/[^\w\s-]/gi, '').trim();
-            
-            doc.setFontSize(13);
-            doc.setTextColor(...darkGray);
-            doc.setFont('helvetica', 'bold');
-            doc.text(`Nivel: ${nivelTexto}`, 20, y + 18);
-            
-            doc.setFontSize(11);
-            doc.setFont('helvetica', 'normal');
-            doc.text(`Puntuacion General: ${results.porcentajeGeneral}%`, 20, y + 30);
-            
-            // Tu Plan Recomendado
-            y += 60;
-            doc.setFontSize(14);
-            doc.setFont('helvetica', 'bold');
-            doc.setTextColor(...verde);
-            doc.text('TU PLAN RECOMENDADO', 20, y);
-            
-            y += 10;
-            doc.setFontSize(10);
-            doc.setFont('helvetica', 'normal');
-            doc.setTextColor(...darkGray);
-            const descripcionLines = doc.splitTextToSize(results.nivelDescripcion, 170);
-            doc.text(descripcionLines, 20, y);
-            y += descripcionLines.length * 4 + 8;
-            
-            // HERRAMIENTAS DETALLADAS
-            doc.addPage();
-            y = 25;
-            
-            doc.setFontSize(16);
-            doc.setFont('helvetica', 'bold');
-            doc.setTextColor(...verde);
-            doc.text('HERRAMIENTAS RECOMENDADAS', 20, y);
-            
-            y += 12;
-            
-            // Obtener solo preguntas con respuesta NO que no fueron auto-saltadas
-            const preguntasNO = currentState.respuestas.filter(r => !r.respuesta && !r.auto_skipped);
-            
-            preguntasNO.forEach((pregunta, idx) => {
-                if (y > 265) {
-                    doc.addPage();
-                    y = 25;
-                }
-                
-                // Obtener herramientas vinculadas
-                const herramientasVinculadas = appData.herramientas.filter(h => 
-                    h.id_preguntas_vinculadas.split(',').map(id => id.trim()).includes(pregunta.id)
-                );
-                
-                if (herramientasVinculadas.length > 0) {
-                    // Categoría
-                    doc.setFontSize(11);
-                    doc.setTextColor(...verde);
-                    doc.setFont('helvetica', 'bold');
-                    doc.text(pregunta.categoria, 20, y);
-                    y += 6;
-                    
-                    // Pregunta
-                    doc.setFontSize(9);
-                    doc.setTextColor(...darkGray);
-                    doc.setFont('helvetica', 'normal');
-                    const preguntaLines = doc.splitTextToSize(pregunta.pregunta, 170);
-                    doc.text(preguntaLines, 20, y);
-                    y += preguntaLines.length * 3.5 + 3;
-                    
-                    // Recomendación
-                    if (pregunta.recomendacion) {
-                        doc.setFont('helvetica', 'italic');
-                        doc.setTextColor(100, 100, 100);
-                        const recomendacionLines = doc.splitTextToSize(`Recomendacion: ${pregunta.recomendacion}`, 165);
-                        doc.text(recomendacionLines, 22, y);
-                        y += recomendacionLines.length * 3.5 + 5;
-                    }
-                    
-                    // Herramientas
-                    herramientasVinculadas.forEach(herr => {
-                        if (y > 260) {
-                            doc.addPage();
-                            y = 25;
-                        }
-                        
-                        doc.setFontSize(10);
-                        doc.setTextColor(...verde);
-                        doc.setFont('helvetica', 'bold');
-                        doc.text(`${herr.nombre}`, 25, y);
-                        y += 5;
-                        
-                        // Descripción de uso
-                        doc.setFontSize(9);
-                        doc.setTextColor(...darkGray);
-                        doc.setFont('helvetica', 'normal');
-                        const descripcionLines = doc.splitTextToSize(herr.descripcion_uso, 160);
-                        doc.text(descripcionLines, 25, y);
-                        y += descripcionLines.length * 3.5 + 2;
-                        
-                        // Detalles
-                        doc.setFontSize(8);
-                        doc.setTextColor(100, 100, 100);
-                        doc.text(`Tipo: ${herr.tipo} | Duracion: ${herr.duracion} | Costo: ${herr.costo} | Nivel: ${herr.nivel}`, 25, y);
-                        y += 4;
-                        
-                        // Link (si existe y no es ejemplo.com)
-                        if (herr.url && !herr.url.includes('ejemplo.com')) {
-                            doc.setTextColor(16, 185, 129);
-                            doc.textWithLink('Ver recurso', 25, y, { url: herr.url });
-                            y += 5;
-                        }
-                        
-                        y += 3;
-                    });
-                    
-                    y += 5;
-                }
-            });
-            
-            // Footer en todas las páginas
-            const pageCount = doc.internal.getNumberOfPages();
-            for (let i = 1; i <= pageCount; i++) {
-                doc.setPage(i);
-                doc.setFontSize(8);
-                doc.setTextColor(156, 163, 175);
-                doc.text(`Scanner Ambiental - Pagina ${i} de ${pageCount}`, 20, 285);
-                doc.text(`Generado: ${new Date().toLocaleString('es-CL')}`, 140, 285);
-            }
-            
-            const filename = `Reporte_Ambiental_${currentState.empresaSeleccionada.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
-            doc.save(filename);
-        }
-
-        function restartScanner() {
-            if (gaugeChart) {
-                gaugeChart.destroy();
-                gaugeChart = null;
-            }
-            
-            currentState = {
-                empresaSeleccionada: null,
-                preguntaActual: 0,
-                respuestas: [],
-                preguntasSaltadas: new Set(),
-                resultados: null
-            };
-            
-            showScreen('welcomeScreen');
-            document.getElementById('progressInfo').style.display = 'none';
-            
-            // Resetear formulario
-            document.getElementById('userName').value = '';
-            document.getElementById('userEmail').value = '';
-            document.getElementById('userDataForm').style.display = 'none';
-            document.getElementById('empresaGrid').style.display = 'grid';
-            document.querySelector('h2').style.display = 'block';
-
-            // // Comentario: Restaurar logos originales al reiniciar
-            const logoHeaderContainer = document.getElementById('logoHeaderContainer');
-            if (logoHeaderContainer) {
-                logoHeaderContainer.innerHTML = `<svg width="32" height="32" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
-                        <rect width="80" height="80" fill="#ffffff" rx="10"/>
-                        <path d="M20 30L40 50L60 20" stroke="#E74100" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>`;
-            }
-            const logoWelcomeContainer = document.getElementById('logoWelcomeContainer');
-            if (logoWelcomeContainer) {
-                logoWelcomeContainer.innerHTML = `<img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iODAiIHZpZXdCb3g9IjAgMCA4MCA4MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iZ3JhZDEiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdHlsZT0ic3RvcC1jb2xvcjojMDA2NkRDO3N0b3Atb3BhY2l0eToxIiAvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiMwMDRBQUU7c3RvcC1vcGFjaXR5OjEiIC8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8cmVjdCB3aWR0aD0iODAiIGhlaWdodD0iODAiIGZpbGw9InVybCgjZ3JhZDEpIiByeD0iMTUiLz4KICA8cGF0aCBkPSJNMjAgMzBMNDAgNTBMNjAgMjAiIHN0cm9rZT0iI0U3NDEwMCIgc3Ryb2tlLXdpZHRoPSI2IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPC9zdmc+" alt="Compromiso Pro" style="width: 60px; height: 60px;">`;
-            }
-        }
-
-        // Cargar datos al iniciar
-        window.addEventListener('DOMContentLoaded', () => {
-            loadDataFromSheets();
-        });
+        function restartScanner() { location.reload(); }
     </script>
 </body>
 </html>
-
