@@ -6,7 +6,6 @@
     <title>🌱 Scanner Ambiental - Diagnóstico Empresarial</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --primary-blue: #0066DC; --primary-orange: #E74100;
@@ -15,46 +14,88 @@
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%); color: var(--text-light); min-height: 100vh; }
+        
+        /* HEADER */
         .header { background: linear-gradient(135deg, var(--primary-blue), #004AAE); padding: 1.5rem 0; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 20px rgba(0,0,0,0.3); border-bottom: 2px solid var(--primary-orange); }
         .header-content { max-width: 1200px; margin: 0 auto; padding: 0 2rem; display: flex; justify-content: space-between; align-items: center; }
         .logo { display: flex; align-items: center; gap: 0.75rem; font-size: 1.5rem; font-weight: 700; }
+        .logo img { height: 40px; border-radius: 6px; }
+        .header-progress { display: flex; align-items: center; gap: 1rem; font-size: 0.9rem; color: rgba(255,255,255,0.8); }
+        
         .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
         .screen { display: none; animation: fadeIn 0.5s ease; }
         .screen.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* UI Components */
-        .btn-primary { background: linear-gradient(135deg, var(--primary-blue), #004AAE); color: white; border: none; padding: 1rem 2rem; font-weight: 600; border-radius: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; transition: transform 0.2s; }
+        /* PANTALLA DE CARGA INICIAL */
+        .loading-screen { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            min-height: 60vh; 
+            text-align: center;
+        }
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid var(--border-gray);
+            border-top: 4px solid var(--primary-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1.5rem;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .loading-text { color: var(--text-gray); font-size: 1.1rem; }
+        .loading-subtext { color: var(--text-gray); font-size: 0.9rem; margin-top: 0.5rem; opacity: 0.7; }
+
+        /* BOTONES */
+        .btn-primary { background: linear-gradient(135deg, var(--primary-blue), #004AAE); color: white; border: none; padding: 1rem 2rem; font-weight: 600; border-radius: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.2s; font-size: 1rem; }
         .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,102,220,0.4); }
+        .btn-secondary { background: transparent; color: white; border: 2px solid var(--border-gray); padding: 0.8rem 1.5rem; font-weight: 500; border-radius: 10px; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.2s; font-size: 0.95rem; }
+        .btn-secondary:hover { border-color: var(--primary-blue); background: rgba(0,102,220,0.1); }
+        .btn-back { background: rgba(255,255,255,0.1); color: white; border: 1px solid var(--border-gray); padding: 0.6rem 1.2rem; font-weight: 500; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.2s; font-size: 0.9rem; }
+        .btn-back:hover { background: rgba(255,255,255,0.15); border-color: var(--text-gray); }
+
+        /* CARDS EMPRESA */
         .empresa-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
         .empresa-card { background: var(--card-bg); border: 2px solid var(--border-gray); border-radius: 12px; padding: 2rem; cursor: pointer; text-align: center; transition: all 0.3s; }
-        .empresa-card:hover { border-color: var(--primary-blue); transform: translateY(-5px); }
+        .empresa-card:hover { border-color: var(--primary-blue); transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,102,220,0.2); }
         .empresa-icon { font-size: 3rem; color: var(--primary-blue); margin-bottom: 1rem; }
         
+        /* PREGUNTAS */
         .question-container { max-width: 800px; margin: 2rem auto; background: var(--card-bg); padding: 3rem; border-radius: 16px; border: 1px solid var(--border-gray); }
-        .question-text { font-size: 1.5rem; font-weight: 600; margin-bottom: 2rem; }
-        .answer-buttons { display: flex; gap: 1rem; justify-content: center; }
-        .btn-answer { flex: 1; padding: 1.5rem; border-radius: 12px; font-weight: 600; cursor: pointer; background: #1A1A1A; color: white; border: 2px solid var(--border-gray); transition: all 0.3s; }
-        .btn-answer.si:hover { border-color: var(--env-green); background: rgba(178, 191, 48, 0.1); }
-        .btn-answer.no:hover { border-color: var(--primary-orange); background: rgba(231, 65, 0, 0.1); }
+        .question-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .question-text { font-size: 1.4rem; font-weight: 600; margin-bottom: 2rem; line-height: 1.5; }
+        .answer-buttons { display: flex; gap: 1rem; justify-content: center; margin-bottom: 1.5rem; }
+        .btn-answer { flex: 1; max-width: 200px; padding: 1.5rem; border-radius: 12px; font-weight: 600; font-size: 1.1rem; cursor: pointer; background: #1A1A1A; color: white; border: 2px solid var(--border-gray); transition: all 0.3s; }
+        .btn-answer.si:hover { border-color: var(--env-green); background: rgba(178, 191, 48, 0.15); }
+        .btn-answer.no:hover { border-color: var(--primary-orange); background: rgba(231, 65, 0, 0.15); }
+        .navigation-buttons { display: flex; justify-content: center; padding-top: 1rem; border-top: 1px solid var(--border-gray); }
 
+        /* RESULTADOS */
         .results-header { text-align: center; margin-bottom: 2rem; }
-        .nivel-badge { font-size: 1.5rem; padding: 1rem 2rem; border-radius: 12px; display: inline-block; margin: 1rem 0; }
+        .nivel-badge { font-size: 1.5rem; padding: 1rem 2rem; border-radius: 12px; display: inline-block; margin: 1rem 0; font-weight: 700; }
         .nivel-excelente { background: var(--env-green); color: #1a1a1a; }
         .nivel-bueno { background: var(--primary-blue); }
         .nivel-regular { background: var(--primary-orange); }
         .nivel-inicial { background: #666; }
-        
         .action-buttons { display: flex; gap: 1rem; justify-content: center; margin-top: 3rem; flex-wrap: wrap; }
         
-        .form-input { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #555; background: #1a1a1a; color: white; font-size: 1rem; }
+        /* FORMULARIO */
+        .form-input { width: 100%; padding: 14px; margin-bottom: 15px; border-radius: 10px; border: 1px solid var(--border-gray); background: #1a1a1a; color: white; font-size: 1rem; transition: border-color 0.2s; }
         .form-input:focus { border-color: var(--primary-blue); outline: none; }
-        .form-label { display: block; margin-bottom: 5px; color: #ccc; font-size: 0.9rem; }
+        .form-label { display: block; margin-bottom: 6px; color: #ccc; font-size: 0.9rem; font-weight: 500; }
         
-        /* Estilo original */
+        /* INFO BOXES */
         .info-boxes { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin: 2rem auto 3rem; max-width: 900px; }
         .info-box { background: var(--card-bg); border-radius: 12px; padding: 1.5rem; border: 1px solid var(--border-gray); }
         .info-box-title { color: var(--primary-orange); font-weight: 600; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; }
+
+        /* PROGRESS BAR */
+        .progress-container { max-width: 800px; margin: 0 auto 1rem; }
+        .progress-bar { height: 6px; background: var(--border-gray); border-radius: 3px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary-blue), var(--env-green)); transition: width 0.3s ease; }
     </style>
 </head>
 <body>
@@ -63,33 +104,32 @@
     <div class="header">
         <div class="header-content">
             <div class="logo">
-                <div id="logoHeaderContainer">
-                    <svg width="32" height="32" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
-                        <rect width="80" height="80" fill="#ffffff" rx="10"/>
-                        <path d="M20 30L40 50L60 20" stroke="#E74100" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </div>
-                <span style="margin-left: 10px;">COMPROMISO PRO</span>
+                <img src="https://i.imgur.com/1PrgQLh.jpg" alt="Compromiso Pro">
+                <span>COMPROMISO PRO</span>
             </div>
-            <div style="font-size: 0.9rem; color: rgba(255,255,255,0.7);">
-                <span id="currentQ">0</span> / <span id="totalQ">0</span>
+            <div class="header-progress">
+                <span id="progressText"></span>
             </div>
         </div>
     </div>
 
     <div class="container">
         
+        <!-- PANTALLA 0: CARGA INICIAL -->
+        <div id="loadingInitialScreen" class="screen active">
+            <div class="loading-screen">
+                <img src="https://i.imgur.com/1PrgQLh.jpg" alt="Compromiso Pro" style="height: 80px; border-radius: 12px; margin-bottom: 2rem;">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">Cargando cuestionarios...</div>
+                <div class="loading-subtext">Preparando tu diagnóstico ambiental</div>
+            </div>
+        </div>
+
         <!-- PANTALLA 1: BIENVENIDA -->
-        <div id="welcomeScreen" class="screen active">
+        <div id="welcomeScreen" class="screen">
             <div style="text-align: center; padding: 3rem 0;">
-                <div id="logoWelcomeContainer" style="margin-bottom: 1rem;">
-                    <svg width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
-                        <rect width="80" height="80" fill="url(#grad1)" rx="15"/>
-                        <defs><linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#0066DC;stop-opacity:1" /><stop offset="100%" style="stop-color:#004AAE;stop-opacity:1" /></linearGradient></defs>
-                        <path d="M20 30L40 50L60 20" stroke="#E74100" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </div>
-                <h1 style="font-size: 3rem; margin-bottom: 1rem;">SCANNER AMBIENTAL</h1>
+                <img src="https://i.imgur.com/1PrgQLh.jpg" alt="Compromiso Pro" style="height: 80px; border-radius: 12px; margin-bottom: 1rem;">
+                <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">SCANNER AMBIENTAL</h1>
                 <p style="color: var(--text-gray); font-size: 1.2rem; max-width: 600px; margin: 0 auto;">
                     Identifica en cuál de las 5 áreas ambientales debes enfocarte primero.
                 </p>
@@ -100,23 +140,24 @@
                         <div style="color: #999; font-size: 0.9rem;">Gestión de residuos, Eficiencia hídrica, Certificaciones, Huella de carbono, Energía.</div>
                     </div>
                     <div class="info-box">
-                        <div class="info-box-title"><i class="fas fa-clock"></i> Tiempo</div>
-                        <div style="color: #999; font-size: 0.9rem;">5 minutos. Recibirás priorización y reporte PDF.</div>
+                        <div class="info-box-title"><i class="fas fa-clock"></i> Tiempo estimado</div>
+                        <div style="color: #999; font-size: 0.9rem;">5 minutos. Recibirás un reporte PDF con tu diagnóstico personalizado.</div>
                     </div>
                 </div>
             </div>
             
             <h2 style="text-align: center; margin-top: 1rem;">Selecciona tu tipo de empresa:</h2>
-            <div class="empresa-grid" id="empresaGrid">
-                <!-- Se llena con JS -->
-            </div>
+            <div class="empresa-grid" id="empresaGrid"></div>
 
-            <!-- Formulario Datos Usuario (OBLIGATORIOS) -->
+            <!-- Formulario Datos Usuario -->
             <div id="userDataForm" style="display: none; max-width: 450px; margin: 2rem auto; background: var(--card-bg); padding: 2rem; border-radius: 12px; border: 1px solid var(--border-gray);">
                 <h3 style="margin-bottom: 1.5rem; text-align: center; color: var(--primary-blue);">Completa tus datos para iniciar</h3>
                 
                 <label class="form-label">Nombre Completo *</label>
                 <input type="text" id="userName" class="form-input" placeholder="Ej: Juan Pérez">
+                
+                <label class="form-label">Nombre de la Empresa *</label>
+                <input type="text" id="companyName" class="form-input" placeholder="Ej: Constructora ABC Ltda.">
                 
                 <label class="form-label">RUT Empresa *</label>
                 <input type="text" id="userRut" class="form-input" placeholder="Ej: 76.123.456-7">
@@ -125,23 +166,41 @@
                 <input type="email" id="userEmail" class="form-input" placeholder="Ej: contacto@empresa.cl">
                 
                 <div style="font-size: 0.8rem; color: #888; margin-bottom: 1.5rem;">
-                    * Campos obligatorios. El reporte final será enviado a este correo.
+                    * Campos obligatorios. El reporte será enviado a este correo.
                 </div>
 
-                <button class="btn-primary" onclick="startSurvey()" style="width: 100%; justify-content: center;">
-                    <i class="fas fa-play"></i> Comenzar Evaluación
-                </button>
+                <div style="display: flex; gap: 1rem;">
+                    <button class="btn-secondary" onclick="volverSeleccionEmpresa()" style="flex: 1;">
+                        <i class="fas fa-arrow-left"></i> Volver
+                    </button>
+                    <button class="btn-primary" onclick="startSurvey()" style="flex: 2;">
+                        <i class="fas fa-play"></i> Comenzar
+                    </button>
+                </div>
             </div>
         </div>
 
         <!-- PANTALLA 2: PREGUNTAS -->
         <div id="questionScreen" class="screen">
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressBar" style="width: 0%"></div>
+                </div>
+            </div>
             <div class="question-container">
-                <span id="rutaBadge" style="color: var(--primary-blue); font-weight: 700; text-transform: uppercase; display: block; margin-bottom: 10px;">CATEGORÍA</span>
+                <div class="question-header">
+                    <span id="rutaBadge" style="color: var(--primary-blue); font-weight: 700; text-transform: uppercase; font-size: 0.9rem;">CATEGORÍA</span>
+                    <span id="questionCounter" style="color: var(--text-gray); font-size: 0.9rem;">1 / 20</span>
+                </div>
                 <div class="question-text" id="questionText">...</div>
                 <div class="answer-buttons">
                     <button class="btn-answer si" onclick="answerQuestion(true)"><i class="fas fa-check"></i> SÍ</button>
                     <button class="btn-answer no" onclick="answerQuestion(false)"><i class="fas fa-times"></i> NO</button>
+                </div>
+                <div class="navigation-buttons">
+                    <button class="btn-back" id="btnRetroceder" onclick="retrocederPregunta()">
+                        <i class="fas fa-arrow-left"></i> Pregunta anterior
+                    </button>
                 </div>
             </div>
         </div>
@@ -156,33 +215,37 @@
             </div>
 
             <div class="action-buttons">
-                <button class="btn-primary" onclick="restartScanner()" style="background: #444;">
+                <button class="btn-secondary" onclick="restartScanner()">
                     <i class="fas fa-redo"></i> Nueva Evaluación
                 </button>
-                
                 <button class="btn-primary" onclick="generarPDFPro()" style="background: linear-gradient(135deg, #28a745, #218838);">
                     <i class="fas fa-file-pdf"></i> Descargar Reporte PRO
                 </button>
             </div>
             <p style="text-align: center; color: #888; margin-top: 1rem; font-size: 0.9rem;">
-                <i class="fas fa-envelope"></i> Al descargar, también recibirás una copia en tu correo.
+                <i class="fas fa-envelope"></i> También recibirás una copia en tu correo.
             </p>
         </div>
 
-        <!-- LOADING -->
+        <!-- PANTALLA LOADING GENÉRICO -->
         <div id="loadingScreen" class="screen" style="text-align: center; padding-top: 5rem;">
-            <i class="fas fa-circle-notch fa-spin" style="font-size: 3rem; color: var(--primary-blue);"></i>
-            <p style="margin-top: 1rem;">Procesando datos...</p>
+            <div class="loading-spinner" style="margin: 0 auto 1.5rem;"></div>
+            <p style="color: var(--text-gray);">Procesando datos...</p>
         </div>
 
     </div>
 
     <script>
         // ⚠️ URL DE TU SCRIPT
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwk6iBwQ-CJWZ2LIBPqdNtuFsTfA8WlwRDxYN5x3VPAPkEARvcNygeywxGPvUg3Tuk/exec';
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbytEhLtpG1IGJUuj46VojStMBrj6G-KlvTJV_Ta9gobqZqDXh2EQwWk3EDm-6ib12VO/exec';
         
         let appData = {};
-        let currentState = { respuestas: [], preguntasFiltradas: [], preguntaActual: 0 };
+        let currentState = { 
+            respuestas: [], 
+            preguntasFiltradas: [], 
+            preguntaActual: 0,
+            historialRespuestas: [] // Para el botón retroceder
+        };
 
         window.addEventListener('DOMContentLoaded', loadData);
 
@@ -191,16 +254,14 @@
                 const res = await fetch(APPS_SCRIPT_URL);
                 const data = await res.json();
                 appData = data;
-                if (appData.configuracion && appData.configuracion.URL_Logo) {
-                    const url = appData.configuracion.URL_Logo;
-                    document.getElementById('logoHeaderContainer').innerHTML = `<img src="${url}" style="height: 32px; border-radius: 4px;">`;
-                    document.getElementById('logoWelcomeContainer').innerHTML = `<img src="${url}" style="height: 80px; border-radius: 8px;">`;
-                }
                 renderEmpresas();
-                console.log("Datos cargados.");
+                // Mostrar pantalla de bienvenida
+                showScreen('welcomeScreen');
+                console.log("Datos cargados correctamente.");
             } catch (e) {
                 console.error(e);
-                alert("Error cargando datos. Revisa la conexión.");
+                document.querySelector('.loading-text').textContent = 'Error al cargar';
+                document.querySelector('.loading-subtext').textContent = 'Revisa tu conexión e intenta de nuevo';
             }
         }
 
@@ -215,26 +276,36 @@
                 let icon = emp.icono || 'fa-building';
                 if (!icon.includes('fa-')) icon = 'fa-' + icon;
                 
-                div.innerHTML = `<div class="empresa-icon"><i class="fas ${icon}"></i></div><h3>${emp.tipo}</h3><p>${emp.desc||''}</p>`;
-                div.onclick = () => {
-                    currentState.empresaSeleccionada = emp.tipo;
-                    document.getElementById('empresaGrid').style.display = 'none';
-                    document.querySelector('h2').style.display = 'none';
-                    document.getElementById('userDataForm').style.display = 'block';
-                };
+                div.innerHTML = `<div class="empresa-icon"><i class="fas ${icon}"></i></div><h3>${emp.tipo}</h3><p style="color: var(--text-gray); font-size: 0.9rem; margin-top: 0.5rem;">${emp.desc||''}</p>`;
+                div.onclick = () => seleccionarEmpresa(emp.tipo);
                 grid.appendChild(div);
             });
         }
 
+        function seleccionarEmpresa(tipo) {
+            currentState.empresaSeleccionada = tipo;
+            document.getElementById('empresaGrid').style.display = 'none';
+            document.querySelector('#welcomeScreen h2').style.display = 'none';
+            document.querySelector('#welcomeScreen > div').style.display = 'none';
+            document.getElementById('userDataForm').style.display = 'block';
+        }
+
+        function volverSeleccionEmpresa() {
+            document.getElementById('empresaGrid').style.display = 'grid';
+            document.querySelector('#welcomeScreen h2').style.display = 'block';
+            document.querySelector('#welcomeScreen > div').style.display = 'block';
+            document.getElementById('userDataForm').style.display = 'none';
+            currentState.empresaSeleccionada = null;
+        }
+
         function startSurvey() {
-            // 1. CAPTURA DE DATOS
             const nombre = document.getElementById('userName').value.trim();
+            const empresa = document.getElementById('companyName').value.trim();
             const rut = document.getElementById('userRut').value.trim();
             const email = document.getElementById('userEmail').value.trim();
 
-            // 2. VALIDACIÓN OBLIGATORIA
-            if (!nombre || !rut || !email) {
-                alert("⚠️ Por favor, completa todos los campos obligatorios (*).\nSon necesarios para generar tu reporte personalizado.");
+            if (!nombre || !empresa || !rut || !email) {
+                alert("⚠️ Por favor, completa todos los campos obligatorios.");
                 return;
             }
             if (!email.includes('@')) {
@@ -243,24 +314,24 @@
             }
 
             currentState.userName = nombre;
+            currentState.companyName = empresa;
             currentState.userRut = rut;
             currentState.userEmail = email;
             
-            // 3. INICIO LÓGICA PREGUNTAS
             currentState.preguntasFiltradas = appData.preguntas.filter(p => {
                 if (!p.tipo_empresa) return false; 
                 const tipos = p.tipo_empresa.split(',').map(t => t.trim());
                 return tipos.includes(currentState.empresaSeleccionada) || tipos.includes('Todas');
             }).sort((a,b) => a.orden - b.orden);
 
-            // 🛡️ BLOQUE DE SEGURIDAD
             if (currentState.preguntasFiltradas.length === 0) {
-                alert(`⚠️ No se encontraron preguntas para "${currentState.empresaSeleccionada}".\nPosible error en la configuración del Excel (Columna H).`);
+                alert(`⚠️ No se encontraron preguntas para "${currentState.empresaSeleccionada}".`);
                 return;
             }
 
             currentState.preguntaActual = 0;
             currentState.respuestas = [];
+            currentState.historialRespuestas = [];
             currentState.saltadas = new Set();
             
             showScreen('questionScreen');
@@ -269,53 +340,115 @@
 
         function renderQuestion() {
             const p = currentState.preguntasFiltradas[currentState.preguntaActual];
+            
+            // Saltar preguntas marcadas
             if (currentState.saltadas.has(p.id)) {
                 currentState.preguntaActual++;
                 if (currentState.preguntaActual >= currentState.preguntasFiltradas.length) return finishSurvey();
                 return renderQuestion();
             }
+
             document.getElementById('rutaBadge').innerText = p.categoria;
             document.getElementById('questionText').innerText = p.pregunta;
-            document.getElementById('currentQ').innerText = currentState.preguntaActual + 1;
-            document.getElementById('totalQ').innerText = currentState.preguntasFiltradas.length;
+            
+            // Contador y progreso
+            const current = currentState.preguntaActual + 1;
+            const total = currentState.preguntasFiltradas.length;
+            document.getElementById('questionCounter').innerText = `${current} / ${total}`;
+            document.getElementById('progressText').innerText = `Pregunta ${current} de ${total}`;
+            document.getElementById('progressBar').style.width = `${(current / total) * 100}%`;
+
+            // Botón retroceder
+            const btnRetroceder = document.getElementById('btnRetroceder');
+            if (currentState.preguntaActual === 0) {
+                btnRetroceder.innerHTML = '<i class="fas fa-arrow-left"></i> Cambiar cuestionario';
+            } else {
+                btnRetroceder.innerHTML = '<i class="fas fa-arrow-left"></i> Pregunta anterior';
+            }
         }
 
         function answerQuestion(val) {
             const p = currentState.preguntasFiltradas[currentState.preguntaActual];
+            
+            // Guardar en historial para poder retroceder
+            currentState.historialRespuestas.push({
+                index: currentState.preguntaActual,
+                respuesta: {
+                    id: p.id, categoria: p.categoria, pregunta: p.pregunta,
+                    recomendacion: p.recomendacion_si_no, peso: p.peso, respuesta: val
+                },
+                saltadasAntes: new Set(currentState.saltadas)
+            });
+
             currentState.respuestas.push({
                 id: p.id, categoria: p.categoria, pregunta: p.pregunta,
                 recomendacion: p.recomendacion_si_no, peso: p.peso, respuesta: val
             });
+
+            // Si responde NO, saltar preguntas hijas
             if (!val && p.id) {
-                 const hijas = currentState.preguntasFiltradas.filter(h => h.madre === p.id);
-                 hijas.forEach(h => {
-                     currentState.saltadas.add(h.id);
-                     currentState.respuestas.push({id: h.id, categoria:h.categoria, respuesta: false, peso: h.peso, skipped: true});
-                 });
+                const hijas = currentState.preguntasFiltradas.filter(h => h.madre === p.id);
+                hijas.forEach(h => {
+                    currentState.saltadas.add(h.id);
+                    currentState.respuestas.push({id: h.id, categoria: h.categoria, respuesta: false, peso: h.peso, skipped: true});
+                });
             }
+
             currentState.preguntaActual++;
             if (currentState.preguntaActual >= currentState.preguntasFiltradas.length) finishSurvey();
             else renderQuestion();
         }
 
+        function retrocederPregunta() {
+            if (currentState.preguntaActual === 0) {
+                // Volver a selección de cuestionario
+                if (confirm('¿Deseas cambiar el tipo de cuestionario?')) {
+                    showScreen('welcomeScreen');
+                    volverSeleccionEmpresa();
+                }
+                return;
+            }
+
+            // Restaurar estado anterior
+            const ultimo = currentState.historialRespuestas.pop();
+            if (ultimo) {
+                // Quitar la última respuesta
+                currentState.respuestas = currentState.respuestas.filter(r => r.id !== ultimo.respuesta.id && !r.skipped);
+                
+                // También quitar respuestas skipped que se agregaron
+                const hijasDelUltimo = currentState.preguntasFiltradas.filter(h => h.madre === ultimo.respuesta.id);
+                hijasDelUltimo.forEach(h => {
+                    currentState.respuestas = currentState.respuestas.filter(r => r.id !== h.id);
+                });
+
+                // Restaurar saltadas
+                currentState.saltadas = ultimo.saltadasAntes;
+                currentState.preguntaActual = ultimo.index;
+                renderQuestion();
+            }
+        }
+
         function finishSurvey() {
             showScreen('loadingScreen');
+            
             let total = 0, obtained = 0;
             currentState.respuestas.forEach(r => {
                 if (!r.skipped) total += (r.peso || 0);
                 if (r.respuesta) obtained += (r.peso || 0);
             });
+            
             const score = total === 0 ? 0 : Math.round((obtained/total)*100);
-            let nivel = "INICIAL", clase = "nivel-inicial", msg = "Estás comenzando tu camino.";
-            if(score >= 40) { nivel = "REGULAR"; clase = "nivel-regular"; msg = "Tienes avances, pero falta estructura."; }
-            if(score >= 60) { nivel = "BUENO"; clase = "nivel-bueno"; msg = "Buen camino, enfócate en certificar."; }
-            if(score >= 80) { nivel = "EXCELENTE"; clase = "nivel-excelente"; msg = "Líder en sostenibilidad."; }
+            let nivel = "INICIAL", clase = "nivel-inicial", msg = "Estás comenzando tu camino hacia la sostenibilidad.";
+            if(score >= 40) { nivel = "REGULAR"; clase = "nivel-regular"; msg = "Tienes avances importantes, pero falta estructura."; }
+            if(score >= 60) { nivel = "BUENO"; clase = "nivel-bueno"; msg = "Buen camino, enfócate en certificar tus logros."; }
+            if(score >= 80) { nivel = "EXCELENTE"; clase = "nivel-excelente"; msg = "Eres líder en sostenibilidad. ¡Felicitaciones!"; }
 
             currentState.resultados = { score, nivel, msg };
             document.getElementById('nivelBadge').innerText = nivel;
             document.getElementById('nivelBadge').className = `nivel-badge ${clase}`;
             document.getElementById('scoreDisplay').innerText = score + '%';
             document.getElementById('orientationMessage').innerText = msg;
+            
             saveData(score, nivel);
             setTimeout(() => showScreen('resultsScreen'), 1000);
         }
@@ -336,7 +469,7 @@
         function generarPDFPro() {
             const btn = event.currentTarget;
             const original = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando y Enviando...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando...';
             btn.disabled = true;
 
             const falladas = currentState.respuestas.filter(r => r.respuesta === false && !r.skipped);
@@ -349,15 +482,16 @@
                 }));
                 return {
                     categoria: f.categoria, pregunta: f.pregunta,
-                    consejo: f.recomendacion || "Revisar manuales.", herramientas: tools
+                    consejo: f.recomendacion || "Revisar documentación.", herramientas: tools
                 };
             });
 
             const payload = {
                 action: 'generar_pdf',
                 meta: {
-                    fecha: new Date().toLocaleDateString(),
-                    empresa: currentState.empresaSeleccionada,
+                    fecha: new Date().toLocaleDateString('es-CL'),
+                    empresa: currentState.companyName, // Nombre real de la empresa
+                    tipo_empresa: currentState.empresaSeleccionada, // Tipo de cuestionario
                     usuario: currentState.userName,
                     email_usuario: currentState.userEmail,
                     rut_empresa: currentState.userRut,
@@ -373,14 +507,17 @@
                 .then(d => {
                     if(d.status === 'success') {
                         downloadBase64(d.base64, d.nombreArchivo);
-                        alert("✅ ¡Listo! Reporte descargado y enviado a tu correo.");
+                        alert("✅ ¡Reporte generado! También lo recibirás en tu correo.");
+                    } else {
+                        alert("Error: " + d.message);
                     }
-                    else alert("Error: " + d.message);
-                    btn.innerHTML = original; btn.disabled = false;
+                    btn.innerHTML = original; 
+                    btn.disabled = false;
                 })
                 .catch(e => {
-                    alert("Error de conexión. Revisa tu internet.");
-                    btn.innerHTML = original; btn.disabled = false;
+                    alert("Error de conexión.");
+                    btn.innerHTML = original; 
+                    btn.disabled = false;
                 });
         }
 
@@ -394,8 +531,16 @@
         function showScreen(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
+            
+            // Limpiar header progress si no es pantalla de preguntas
+            if (id !== 'questionScreen') {
+                document.getElementById('progressText').innerText = '';
+            }
         }
-        function restartScanner() { location.reload(); }
+
+        function restartScanner() { 
+            location.reload(); 
+        }
     </script>
 </body>
 </html>
