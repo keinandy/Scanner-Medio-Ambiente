@@ -13,7 +13,8 @@
             --text-light: #FFFFFF; --text-gray: #999999; --border-gray: #444444;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%); color: var(--text-light); min-height: 100vh; }
+        body { font-family: 'Inter', sans-serif; background: #b3be3d; color: var(--text-light); min-height: 100vh; transition: background 0.5s ease; }
+        body.dark-mode { background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%); }
         
         /* HEADER */
         .header { background: linear-gradient(135deg, var(--primary-blue), #004AAE); padding: 1.5rem 0; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 20px rgba(0,0,0,0.3); border-bottom: 2px solid var(--primary-orange); }
@@ -39,15 +40,15 @@
         .loading-spinner {
             width: 60px;
             height: 60px;
-            border: 4px solid var(--border-gray);
-            border-top: 4px solid var(--primary-blue);
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid #1a1a1a;
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin-bottom: 1.5rem;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .loading-text { color: var(--text-gray); font-size: 1.1rem; }
-        .loading-subtext { color: var(--text-gray); font-size: 0.9rem; margin-top: 0.5rem; opacity: 0.7; }
+        .loading-text { color: #1a1a1a; font-size: 1.1rem; font-weight: 600; }
+        .loading-subtext { color: #333; font-size: 0.9rem; margin-top: 0.5rem; }
 
         /* BOTONES */
         .btn-primary { background: linear-gradient(135deg, var(--primary-blue), #004AAE); color: white; border: none; padding: 1rem 2rem; font-weight: 600; border-radius: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.2s; font-size: 1rem; }
@@ -59,8 +60,9 @@
 
         /* CARDS EMPRESA */
         .empresa-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
-        .empresa-card { background: var(--card-bg); border: 2px solid var(--border-gray); border-radius: 12px; padding: 2rem; cursor: pointer; text-align: center; transition: all 0.3s; }
-        .empresa-card:hover { border-color: var(--primary-blue); transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,102,220,0.2); }
+        .empresa-card { background: white; border: 2px solid rgba(0,0,0,0.1); border-radius: 12px; padding: 2rem; cursor: pointer; text-align: center; transition: all 0.3s; color: #333; }
+        .empresa-card:hover { border-color: var(--primary-blue); transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .empresa-card h3 { color: #1a1a1a; }
         .empresa-icon { font-size: 3rem; color: var(--primary-blue); margin-bottom: 1rem; }
         
         /* PREGUNTAS */
@@ -89,8 +91,9 @@
         
         /* INFO BOXES */
         .info-boxes { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin: 2rem auto 3rem; max-width: 900px; }
-        .info-box { background: var(--card-bg); border-radius: 12px; padding: 1.5rem; border: 1px solid var(--border-gray); }
-        .info-box-title { color: var(--primary-orange); font-weight: 600; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; }
+        .info-box { background: white; border-radius: 12px; padding: 1.5rem; border: 1px solid rgba(0,0,0,0.1); }
+        .info-box-title { color: var(--primary-blue); font-weight: 600; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; }
+        .info-box-desc { color: #555; font-size: 0.9rem; }
 
         /* PROGRESS BAR */
         .progress-container { max-width: 800px; margin: 0 auto 1rem; }
@@ -128,49 +131,49 @@
         <!-- PANTALLA 1: BIENVENIDA -->
         <div id="welcomeScreen" class="screen">
             <div style="text-align: center; padding: 3rem 0;">
-                <img src="https://i.imgur.com/1PrgQLh.jpg" alt="Compromiso Pro" style="height: 80px; border-radius: 12px; margin-bottom: 1rem;">
-                <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">SCANNER AMBIENTAL</h1>
-                <p style="color: var(--text-gray); font-size: 1.2rem; max-width: 600px; margin: 0 auto;">
+                <img src="https://i.imgur.com/1PrgQLh.jpg" alt="Compromiso Pro" style="height: 80px; border-radius: 12px; margin-bottom: 1rem; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                <h1 style="font-size: 2.5rem; margin-bottom: 1rem; color: #1a1a1a;">SCANNER AMBIENTAL</h1>
+                <p style="color: #333; font-size: 1.2rem; max-width: 600px; margin: 0 auto;">
                     Identifica en cuál de las 5 áreas ambientales debes enfocarte primero.
                 </p>
                 
                 <div class="info-boxes">
                     <div class="info-box">
                         <div class="info-box-title"><i class="fas fa-clipboard-check"></i> ¿Qué evaluaremos?</div>
-                        <div style="color: #999; font-size: 0.9rem;">Gestión de residuos, Eficiencia hídrica, Certificaciones, Huella de carbono, Energía.</div>
+                        <div class="info-box-desc">Gestión de residuos, Eficiencia hídrica, Certificaciones, Huella de carbono, Energía.</div>
                     </div>
                     <div class="info-box">
                         <div class="info-box-title"><i class="fas fa-clock"></i> Tiempo estimado</div>
-                        <div style="color: #999; font-size: 0.9rem;">5 minutos. Recibirás un reporte PDF con tu diagnóstico personalizado.</div>
+                        <div class="info-box-desc">5 minutos. Recibirás un reporte PDF con tu diagnóstico personalizado.</div>
                     </div>
                 </div>
             </div>
             
-            <h2 style="text-align: center; margin-top: 1rem;">Selecciona tu tipo de empresa:</h2>
+            <h2 style="text-align: center; margin-top: 1rem; color: #1a1a1a;">Selecciona tu tipo de empresa:</h2>
             <div class="empresa-grid" id="empresaGrid"></div>
 
             <!-- Formulario Datos Usuario -->
-            <div id="userDataForm" style="display: none; max-width: 450px; margin: 2rem auto; background: var(--card-bg); padding: 2rem; border-radius: 12px; border: 1px solid var(--border-gray);">
+            <div id="userDataForm" style="display: none; max-width: 450px; margin: 2rem auto; background: white; padding: 2rem; border-radius: 12px; border: 1px solid rgba(0,0,0,0.1); box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
                 <h3 style="margin-bottom: 1.5rem; text-align: center; color: var(--primary-blue);">Completa tus datos para iniciar</h3>
                 
-                <label class="form-label">Nombre Completo *</label>
-                <input type="text" id="userName" class="form-input" placeholder="Ej: Juan Pérez">
+                <label class="form-label" style="color: #333;">Nombre Completo *</label>
+                <input type="text" id="userName" class="form-input" placeholder="Ej: Juan Pérez" style="background: #f5f5f5; color: #333; border-color: #ddd;">
                 
-                <label class="form-label">Nombre de la Empresa *</label>
-                <input type="text" id="companyName" class="form-input" placeholder="Ej: Constructora ABC Ltda.">
+                <label class="form-label" style="color: #333;">Nombre de la Empresa *</label>
+                <input type="text" id="companyName" class="form-input" placeholder="Ej: Constructora ABC Ltda." style="background: #f5f5f5; color: #333; border-color: #ddd;">
                 
-                <label class="form-label">RUT Empresa *</label>
-                <input type="text" id="userRut" class="form-input" placeholder="Ej: 76.123.456-7">
+                <label class="form-label" style="color: #333;">RUT Empresa *</label>
+                <input type="text" id="userRut" class="form-input" placeholder="Ej: 76.123.456-7" style="background: #f5f5f5; color: #333; border-color: #ddd;">
                 
-                <label class="form-label">Correo Electrónico *</label>
-                <input type="email" id="userEmail" class="form-input" placeholder="Ej: contacto@empresa.cl">
+                <label class="form-label" style="color: #333;">Correo Electrónico *</label>
+                <input type="email" id="userEmail" class="form-input" placeholder="Ej: contacto@empresa.cl" style="background: #f5f5f5; color: #333; border-color: #ddd;">
                 
-                <div style="font-size: 0.8rem; color: #888; margin-bottom: 1.5rem;">
+                <div style="font-size: 0.8rem; color: #666; margin-bottom: 1.5rem;">
                     * Campos obligatorios. El reporte será enviado a este correo.
                 </div>
 
                 <div style="display: flex; gap: 1rem;">
-                    <button class="btn-secondary" onclick="volverSeleccionEmpresa()" style="flex: 1;">
+                    <button class="btn-secondary" onclick="volverSeleccionEmpresa()" style="flex: 1; color: #333; border-color: #999;">
                         <i class="fas fa-arrow-left"></i> Volver
                     </button>
                     <button class="btn-primary" onclick="startSurvey()" style="flex: 2;">
@@ -237,7 +240,7 @@
 
     <script>
         // ⚠️ URL DE TU SCRIPT
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwk6iBwQ-CJWZ2LIBPqdNtuFsTfA8WlwRDxYN5x3VPAPkEARvcNygeywxGPvUg3Tuk/exec';
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbytEhLtpG1IGJUuj46VojStMBrj6G-KlvTJV_Ta9gobqZqDXh2EQwWk3EDm-6ib12VO/exec';
         
         let appData = {};
         let currentState = { 
@@ -531,6 +534,13 @@
         function showScreen(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
+            
+            // Cambiar a modo oscuro en preguntas y resultados
+            if (id === 'questionScreen' || id === 'resultsScreen' || id === 'loadingScreen') {
+                document.body.classList.add('dark-mode');
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
             
             // Limpiar header progress si no es pantalla de preguntas
             if (id !== 'questionScreen') {
